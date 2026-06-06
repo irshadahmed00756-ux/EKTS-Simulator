@@ -1,0 +1,289 @@
+.custom-node {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  min-width: 120px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-glass);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  font-weight: 600;
+}
+
+.node-body {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
+}
+
+/* Ports */
+.port {
+  width: 14px !important;
+  height: 14px !important;
+  background: var(--bg-secondary) !important;
+  border: 2px solid !important;
+  border-radius: 50% !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+.port:hover {
+  transform: scale(1.5);
+  box-shadow: 0 0 8px currentColor;
+  cursor: crosshair;
+}
+
+.electrical-port {
+  border-color: var(--color-electrical) !important;
+}
+
+.pneumatic-port {
+  border-color: var(--color-pneumatic) !important;
+  border-radius: 2px !important; /* Square for air */
+}
+
+.hydraulic-port {
+  border-color: var(--color-hydraulic) !important;
+  border-radius: 0 !important;
+  transform: rotate(45deg); /* Diamond for hydraulic */
+}
+
+.hydraulic-port:hover {
+  transform: scale(1.5) rotate(45deg);
+}
+
+/* Specific Node Styles */
+.electrical-node {
+  border-top: 2px solid var(--color-electrical);
+}
+
+.ac-node {
+  border-top: 2px solid #ff4444; /* Red for high voltage */
+}
+
+.ac-node .port-label, .ac-node .node-header {
+  color: #ff4444;
+}
+
+.pneumatic-node {
+  border-top: 2px solid var(--color-pneumatic);
+}
+
+.hydraulic-node {
+  border-top: 2px solid var(--color-hydraulic);
+}
+
+.active {
+  box-shadow: var(--shadow-glow-elec);
+  border-color: var(--color-electrical);
+}
+
+.port-label {
+  font-weight: 700;
+  color: var(--color-electrical);
+}
+
+.switch-visual {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.switch-visual .line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-strong);
+}
+
+.switch-visual .contact {
+  width: 20px;
+  height: 2px;
+  background: var(--color-electrical);
+  transition: transform 0.2s;
+  transform-origin: left;
+}
+
+.switch-visual .contact.open {
+  transform: rotate(-30deg);
+}
+
+.switch-visual .contact.closed {
+  transform: rotate(0deg);
+}
+
+.coil-visual {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-strong);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.active .coil-visual {
+  background: rgba(255, 184, 0, 0.2);
+  border-color: var(--color-electrical);
+  color: var(--color-electrical);
+}
+
+.valve-ports {
+  width: 60px;
+  height: 40px;
+  border: 1px solid var(--border-strong);
+  display: flex;
+  position: relative;
+}
+
+.cylinder-body {
+  width: 100px;
+}
+
+.cylinder-chamber {
+  width: 100%;
+  height: 20px;
+  border: 2px solid var(--border-strong);
+  border-radius: 4px;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.piston {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  background: var(--color-pneumatic);
+  transition: left 0.3s ease;
+}
+
+.rod {
+  position: absolute;
+  top: 8px;
+  height: 4px;
+  background: var(--text-muted);
+  transition: width 0.3s ease;
+}
+
+/* Ground node specific */
+.ground-node.short-circuit {
+  border-color: #ff3333;
+  background-color: rgba(255, 51, 51, 0.1);
+  box-shadow: 0 0 10px #ff3333;
+  animation: flash-red 0.5s infinite alternate;
+}
+
+@keyframes flash-red {
+  from { background-color: rgba(255, 51, 51, 0.1); }
+  to { background-color: rgba(255, 51, 51, 0.4); }
+}
+
+/* Ground Symbol */
+.ground-symbol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding-top: 5px;
+}
+
+.g-line {
+  height: 2px;
+  background: var(--color-electrical);
+}
+.g-line.long { width: 24px; }
+.g-line.med { width: 16px; }
+.g-line.short { width: 8px; }
+
+/* Lamp Visual */
+.lamp-visual {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--bg-secondary);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.lamp-visual::after, .lamp-visual::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  background: var(--border-strong);
+  top: 9px;
+  left: 0;
+}
+.lamp-visual::before { transform: rotate(45deg); }
+.lamp-visual::after { transform: rotate(-45deg); }
+
+.lamp-visual.lit {
+  background: var(--color-electrical);
+  box-shadow: 0 0 15px var(--color-electrical);
+  border-color: var(--color-electrical);
+}
+.lamp-visual.lit::before, .lamp-visual.lit::after {
+  background: var(--bg-primary);
+}
+
+/* Motor Visual */
+.motor-visual {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-electrical);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Compressor Visual */
+.compressor-visual {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-pneumatic);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  background: rgba(0, 210, 255, 0.1);
+}
+
+/* Hydraulic Pump Visual */
+.pump-visual {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--color-hydraulic);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+  background: rgba(58, 134, 255, 0.1);
+}

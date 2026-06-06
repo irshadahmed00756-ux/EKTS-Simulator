@@ -1,0 +1,6 @@
+{
+  "appId": "com.ektssimulator.app",
+  "appName": "EKTS Simulator",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
