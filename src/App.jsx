@@ -19,6 +19,7 @@ import {
   LampNode, MotorNode, ValveNode, CylinderNode, CompressorNode, ExhaustNode, 
   HydraulicPumpNode, TankNode, TimerNode, SensorNode, JunctionNode
 } from './nodes/CustomNodes';
+import OrthogonalEdge from './edges/OrthogonalEdge';
 
 const nodeTypes = {
   power: PowerNode,
@@ -37,6 +38,10 @@ const nodeTypes = {
   tank: TankNode,
   timer: TimerNode,
   sensor: SensorNode
+};
+
+const edgeTypes = {
+  orthogonal: OrthogonalEdge,
 };
 
 // Categorized components for the sidebar
@@ -84,6 +89,8 @@ const componentCategories = {
     { type: 'valve', config: { subtype: '4_3_open' }, name: '4/3 Valve (Open Center)', domain: 'hydraulic', icon: ArrowRight },
     { type: 'valve', config: { subtype: '4_3_tandem' }, name: '4/3 Valve (Tandem Center)', domain: 'hydraulic', icon: ArrowRight },
     { type: 'valve', config: { subtype: '4_3_float' }, name: '4/3 Valve (Float Center)', domain: 'hydraulic', icon: ArrowRight },
+    { type: 'valve', config: { subtype: '4_3_closed' }, name: '01-3C2 Valve (Closed)', domain: 'hydraulic', icon: ArrowRight },
+    { type: 'valve', config: { subtype: '4_3_tandem' }, name: '01-3C4 Valve (Tandem)', domain: 'hydraulic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'single_acting' }, name: 'Single Acting Cylinder', domain: 'hydraulic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'double_acting' }, name: 'Double Acting Cylinder', domain: 'hydraulic', icon: ArrowLeftRight },
     { type: 'motorHyd', config: { subtype: 'hyd_motor' }, name: 'Hydraulic Motor', domain: 'hydraulic', icon: Settings },
@@ -159,8 +166,8 @@ function SimulatorApp() {
         { id: 'g1', type: 'ground', position: { x: 300, y: 300 }, data: { subtype: '0v', domain: 'electrical' } }
       ]);
       setEdges([
-        { id: 'e1', source: 'p1', target: 'l1', sourceHandle: 'out', targetHandle: 'in', type: 'step', style: { stroke: '#ffb800', strokeWidth: 3 } },
-        { id: 'e2', source: 'l1', target: 'g1', sourceHandle: 'out', targetHandle: 'in', type: 'step', style: { stroke: '#ffb800', strokeWidth: 3 } }
+        { id: 'e1', source: 'p1', target: 'l1', sourceHandle: 'out', targetHandle: 'in', type: 'orthogonal', style: { stroke: '#ffb800', strokeWidth: 3 } },
+        { id: 'e2', source: 'l1', target: 'g1', sourceHandle: 'out', targetHandle: 'in', type: 'orthogonal', style: { stroke: '#ffb800', strokeWidth: 3 } }
       ]);
     }
   }, [nodes.length, setNodes, setEdges]);
@@ -226,7 +233,7 @@ function SimulatorApp() {
 
         const newEdge = {
           ...params,
-          type: 'step',
+          type: 'orthogonal',
           animated: isAnimated,
           style: { stroke: strokeColor, strokeWidth: 3 },
           interactionWidth: 20,
@@ -256,7 +263,7 @@ function SimulatorApp() {
       target: newJunctionId,
       sourceHandle: edge.sourceHandle,
       targetHandle: 'in',
-      type: 'step',
+      type: 'orthogonal',
       style: edge.style,
       interactionWidth: 20
     };
@@ -267,7 +274,7 @@ function SimulatorApp() {
       target: edge.target,
       sourceHandle: 'out',
       targetHandle: edge.targetHandle,
-      type: 'step',
+      type: 'orthogonal',
       style: edge.style,
       interactionWidth: 20
     };
@@ -355,6 +362,7 @@ function SimulatorApp() {
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
@@ -365,7 +373,7 @@ function SimulatorApp() {
             nodesDraggable={!isSimulating}
             nodesConnectable={!isSimulating}
             elementsSelectable={!isSimulating}
-            connectionLineType="step"
+            connectionLineType="orthogonal"
             fitView
             theme="dark"
           >
