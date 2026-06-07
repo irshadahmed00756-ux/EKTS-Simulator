@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Play, Square, Zap, Settings, ArrowRight, Activity, Circle, PackageOpen, Power, Lightbulb, Fan, Droplet, ArrowLeftRight, Cloud, Clock, SlidersHorizontal, ToggleLeft, Menu, X } from 'lucide-react';
+import { Play, Square, Zap, Settings, ArrowRight, Activity, Circle, PackageOpen, Power, Lightbulb, Fan, Droplet, ArrowLeftRight, Cloud, Clock, SlidersHorizontal, ToggleLeft, Menu, X, Undo2, Download, Upload } from 'lucide-react';
 import {
   ReactFlow,
   MiniMap,
@@ -149,7 +149,9 @@ function SimulatorApp() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [propertiesNodeId, setPropertiesNodeId] = useState(null);
+  const [pastStates, setPastStates] = useState([]);
   const simInterval = useRef(null);
   
   const { screenToFlowPosition } = useReactFlow();
@@ -161,6 +163,19 @@ function SimulatorApp() {
     nodesRef.current = nodes;
     edgesRef.current = edges;
   }, [nodes, edges]);
+
+  const saveSnapshot = useCallback(() => {
+    setPastStates(prev => [...prev, { nodes: nodesRef.current, edges: edgesRef.current }].slice(-50));
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    if (pastStates.length > 0) {
+      const lastState = pastStates[pastStates.length - 1];
+      setNodes(lastState.nodes);
+      setEdges(lastState.edges);
+      setPastStates(prev => prev.slice(0, -1));
+    }
+  }, [pastStates, setNodes, setEdges]);
 
   // Inject default test circuit for debugging
   useEffect(() => {
@@ -230,6 +245,7 @@ function SimulatorApp() {
 
   const onConnect = useCallback(
     (params) => {
+      saveSnapshot();
       setNodes((currentNodes) => {
         const sourceNode = currentNodes.find((n) => n.id === params.source);
         let strokeColor = '#ffb800';
@@ -260,6 +276,7 @@ function SimulatorApp() {
 
   const onEdgeDoubleClick = useCallback((event, edge) => {
     event.preventDefault();
+    saveSnapshot();
     const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
     
     const newJunctionId = `junction-${Date.now()}`;
@@ -297,9 +314,10 @@ function SimulatorApp() {
   }, [screenToFlowPosition, setNodes, setEdges]);
 
   const deleteSelected = useCallback(() => {
+    saveSnapshot();
     setNodes((nds) => nds.filter((n) => !n.selected));
     setEdges((eds) => eds.filter((e) => !e.selected));
-  }, [setNodes, setEdges]);
+  }, [saveSnapshot, setNodes, setEdges]);
 
   const onDragStart = (event, compData) => {
     event.dataTransfer.setData('application/xyflow', JSON.stringify(compData));
@@ -316,6 +334,7 @@ function SimulatorApp() {
       event.preventDefault();
       const rawData = event.dataTransfer.getData('application/xyflow');
       if (!rawData) return;
+      saveSnapshot();
       
       let compData;
       try {
@@ -342,6 +361,7 @@ function SimulatorApp() {
   );
 
   const onAddComponent = useCallback((compData) => {
+    saveSnapshot();
     // Add component to the exact center of the current view
     const position = screenToFlowPosition({
       x: window.innerWidth / 2,
@@ -359,7 +379,45 @@ function SimulatorApp() {
     if (window.innerWidth <= 768) {
       setIsSidebarOpen(false); // Close sidebar automatically on mobile
     }
-  }, [nodes.length, setNodes]);
+  }, [nodes.length, setNodes, saveSnapshot]);
+
+  const handleClear = () => {
+    if (window.confirm("Are you sure you want to clear the entire circuit?")) {
+      saveSnapshot();
+      setNodes([]);
+      setEdges([]);
+    }
+  };
+
+  const handleDownload = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ nodes, edges }));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "circuit.json");
+    document.body.appendChild(dlAnchorElem);
+    dlAnchorElem.click();
+    dlAnchorElem.remove();
+  };
+
+  const handleUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const content = JSON.parse(e.target.result);
+        if (content.nodes && content.edges) {
+          saveSnapshot();
+          setNodes(content.nodes);
+          setEdges(content.edges);
+        }
+      } catch (err) {
+        alert("Invalid file format");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // reset
+  };
 
   return (
     <div className="app-container">
@@ -371,7 +429,17 @@ function SimulatorApp() {
           EKTS<span>•</span><span>Pro</span>
         </div>
         <div className="toolbar">
-          <button className="btn" onClick={() => setNodes([])}>
+          <button className="btn" onClick={handleUndo} disabled={pastStates.length === 0} title="Undo">
+            <Undo2 size={16} />
+          </button>
+          <label className="btn" style={{ cursor: 'pointer' }} title="Upload Circuit">
+            <Upload size={16} />
+            <input type="file" accept=".json" onChange={handleUpload} style={{ display: 'none' }} />
+          </label>
+          <button className="btn" onClick={handleDownload} title="Save/Download Circuit">
+            <Download size={16} />
+          </button>
+          <button className="btn" onClick={handleClear} style={{ color: '#ff4d4d' }}>
             Clear
           </button>
           {isSimulating ? (
@@ -383,10 +451,10 @@ function SimulatorApp() {
               <Play size={16} fill="currentColor" /> Run Simulation
             </button>
           )}
-          <button className="btn" onClick={deleteSelected} style={{ color: '#ff4d4d', border: '1px solid #ff4d4d' }}>
-            Delete Selected
+          <button className="btn" onClick={deleteSelected} style={{ color: '#ff4d4d', border: '1px solid #ff4d4d' }} title="Delete Selected">
+            <X size={16} />
           </button>
-          <button className="btn">
+          <button className="btn" onClick={() => setIsSettingsOpen(true)}>
             <Settings size={16} />
           </button>
         </div>
@@ -485,6 +553,30 @@ function SimulatorApp() {
             </>
           );
         })()}
+
+        {isSettingsOpen && (
+          <>
+            <div className="properties-overlay" onClick={() => setIsSettingsOpen(false)}></div>
+            <div className="properties-panel" style={{ width: 350 }}>
+              <div className="properties-header">
+                About & Settings
+                <button className="close-btn" onClick={() => setIsSettingsOpen(false)}><X size={18} /></button>
+              </div>
+              <div className="property-form" style={{ padding: '10px 0', lineHeight: '1.6' }}>
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>EKTS<span style={{ color: 'var(--color-electrical)' }}>•</span>Pro</h2>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Advanced Industrial Simulator</p>
+                </div>
+                
+                <div style={{ background: 'var(--bg-tertiary)', padding: 15, borderRadius: 8, border: '1px solid var(--border-subtle)' }}>
+                  <h3 style={{ marginBottom: 10, fontSize: '1rem', color: 'var(--text-primary)' }}>Developer Information</h3>
+                  <p style={{ margin: '5px 0' }}><strong>Developed by:</strong> One In All</p>
+                  <p style={{ margin: '5px 0' }}><strong>Contact:</strong> 7979985729</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
       </main>
     </div>
