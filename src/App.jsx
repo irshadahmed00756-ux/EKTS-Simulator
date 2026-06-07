@@ -15,7 +15,7 @@ import '@xyflow/react/dist/style.css';
 import './App.css';
 import { evaluateCircuit } from './simulation/engine';
 import { 
-  PowerNode, GroundNode, SwitchNode, RelayCoilNode, RelayContactNode, 
+  PowerNode, GroundNode, SwitchNode, RelayCoilNode, RelayContactNode, SSRNode,
   LampNode, MotorNode, ValveNode, CylinderNode, CompressorNode, ExhaustNode, 
   HydraulicPumpNode, TankNode, TimerNode, SensorNode, JunctionNode
 } from './nodes/CustomNodes';
@@ -26,6 +26,7 @@ const nodeTypes = {
   ground: GroundNode,
   switch: SwitchNode,
   relayCoil: RelayCoilNode,
+  ssr: SSRNode,
   relayContact: RelayContactNode,
   junction: JunctionNode,
   lamp: LampNode,
@@ -73,7 +74,7 @@ const componentCategories = {
     { type: 'power', config: { subtype: '3phase' }, name: '3-Phase AC (L1/L2/L3)', domain: 'electrical', icon: Zap },
     { type: 'ground', config: { subtype: 'neutral' }, name: 'AC Neutral', domain: 'electrical', icon: Power },
     { type: 'relayCoil', config: { subtype: 'coil_220v_ac', label: 'K2' }, name: '220V Contactor Coil', domain: 'electrical', icon: PackageOpen },
-    { type: 'relayCoil', config: { subtype: 'coil_220v_ac', label: 'SSR1' }, name: 'SSR Relay 220V AC', domain: 'electrical', icon: PackageOpen },
+    { type: 'ssr', config: { subtype: 'ssr_220v', label: 'SSR1' }, name: 'SSR Relay 220V AC', domain: 'electrical', icon: PackageOpen },
     { type: 'relayCoil', config: { subtype: 'coil_110v_ac', label: 'K3' }, name: '110V Contactor Coil', domain: 'electrical', icon: PackageOpen },
     { type: 'lamp', config: { subtype: '110v_ac' }, name: 'Lamp 110V AC', domain: 'electrical', icon: Lightbulb },
     { type: 'lamp', config: { subtype: '220v_ac' }, name: 'Lamp 220V AC', domain: 'electrical', icon: Lightbulb },

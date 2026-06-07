@@ -117,7 +117,15 @@ export const RelayCoilNode = ({ data, isConnectable }) => {
   const isActive = data.isActive || false;
   return (
     <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
-      <Handle type="target" position={Position.Left} id="A1" className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="A1" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Right} id="A2" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      <Handle type="target" position={Position.Left} id="in_no" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out_no" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      <Handle type="target" position={Position.Left} id="in_nc" style={{ top: 80 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out_nc" style={{ top: 80 }} className="port electrical-port" isConnectable={isConnectable} />
+      
       <div className="node-header">
         <PackageOpen size={14} /> {data.label || 'K1'}
       </div>
@@ -125,8 +133,33 @@ export const RelayCoilNode = ({ data, isConnectable }) => {
         <div className="coil-visual">
           {isActive ? 'ENERGIZED' : 'IDLE'}
         </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8, fontSize: '10px', color: 'var(--text-muted)' }}>
+          <div>NO: {isActive ? 'Closed' : 'Open'}</div>
+          <div>NC: {isActive ? 'Open' : 'Closed'}</div>
+        </div>
       </div>
-      <Handle type="source" position={Position.Right} id="A2" className="port electrical-port" isConnectable={isConnectable} />
+    </div>
+  );
+};
+
+export const SSRNode = ({ data, isConnectable }) => {
+  const isActive = data.isActive || false;
+  return (
+    <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
+      <Handle type="target" position={Position.Left} id="A1" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="A2" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      <Handle type="target" position={Position.Right} id="in" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      <div className="node-header">
+        <PackageOpen size={14} /> {data.label || 'SSR'}
+      </div>
+      <div className="node-body">
+        <div className="coil-visual" style={{ background: isActive ? '#00ff0022' : 'transparent', borderColor: isActive ? '#00ff00' : 'var(--border-strong)', color: isActive ? '#00ff00' : 'inherit' }}>
+          {isActive ? 'ON' : 'OFF'}
+        </div>
+      </div>
     </div>
   );
 };
@@ -320,20 +353,46 @@ export const TankNode = ({ data, isConnectable }) => {
 export const TimerNode = ({ data, isConnectable }) => {
   const isActive = data.isActive || false;
   const isDone = data.isDone || false;
-  const subtype = data.subtype || 'ton'; // ton, tof
+  const subtype = data.subtype || 'ton';
+  const targetSeconds = data.targetSeconds !== undefined ? data.targetSeconds : 2.0;
+  const currentTicks = data.ticks || 0;
+  const currentSeconds = (currentTicks / 20).toFixed(1);
+
   return (
-    <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
-      <Handle type="target" position={Position.Left} id="in" className="port electrical-port" isConnectable={isConnectable} />
+    <div className={`custom-node electrical-node digital-timer-node ${isActive ? 'active' : ''}`} style={{ minWidth: 140 }}>
+      {/* Power Pins */}
+      <Handle type="target" position={Position.Left} id="A1" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Right} id="A2" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      {/* Input Pins */}
+      <Handle type="target" position={Position.Left} id="start" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="reset" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="com" style={{ top: 100 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      <div style={{ position: 'absolute', left: '-25px', top: '45px', fontSize: '8px', color: 'var(--text-muted)' }}>Start</div>
+      <div style={{ position: 'absolute', left: '-28px', top: '70px', fontSize: '8px', color: 'var(--text-muted)' }}>Reset</div>
+      <div style={{ position: 'absolute', left: '-23px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>Com</div>
+
+      {/* Output Contact Pins */}
+      <Handle type="target" position={Position.Right} id="in_no" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out_no" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Right} id="in_nc" style={{ top: 100 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out_nc" style={{ top: 125 }} className="port electrical-port" isConnectable={isConnectable} />
+
       <div className="node-header">
         <Clock size={14} color={isDone ? '#00ff00' : 'currentColor'} /> {data.label || 'Timer'}
       </div>
-      <div className="node-body" style={{ flexDirection: 'column', gap: 5 }}>
+      <div className="node-body" style={{ flexDirection: 'column', gap: 5, padding: '5px' }}>
         <div style={{ fontSize: '0.65rem' }}>{subtype.toUpperCase()}</div>
-        <div className="coil-visual">
-          {isDone ? 'DONE' : isActive ? 'TIMING' : 'IDLE'}
+        <div className="digital-display" style={{ 
+          background: '#000', color: '#0f0', padding: '6px 10px', 
+          fontFamily: 'monospace', borderRadius: 4, textAlign: 'center',
+          boxShadow: 'inset 0 0 5px rgba(0,255,0,0.2)', border: '1px solid #333'
+        }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{currentSeconds}s</div>
+          <div style={{ fontSize: '10px', color: '#0a0', marginTop: 2 }}>/ {targetSeconds.toFixed(1)}s</div>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} id="out" className="port electrical-port" isConnectable={isConnectable} />
     </div>
   );
 };
@@ -359,18 +418,23 @@ export const SensorNode = ({ id, data, isConnectable }) => {
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', minHeight: 70 }}
     >
-      <Handle type="target" position={Position.Left} id="in" className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="in_no" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out_no" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      
+      <Handle type="target" position={Position.Left} id="in_nc" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out_nc" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+
       <div className="node-header">
         <Circle size={14} /> {data.label || 'Limit SW'}
       </div>
       <div className="node-body">
-        <div className="coil-visual" style={{ borderColor: isTriggered ? '#00ff00' : 'var(--border-strong)', color: isTriggered ? '#00ff00' : 'inherit' }}>
-          {isTriggered ? 'DETECT' : 'OPEN'}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, fontSize: '10px', alignItems: 'center' }}>
+           <div>NO: <span style={{ color: isTriggered ? '#00ff00' : 'inherit' }}>{isTriggered ? 'CLOSE' : 'OPEN'}</span></div>
+           <div>NC: <span style={{ color: isTriggered ? 'inherit' : '#00ff00' }}>{isTriggered ? 'OPEN' : 'CLOSE'}</span></div>
         </div>
       </div>
-      <Handle type="source" position={Position.Right} id="out" className="port electrical-port" isConnectable={isConnectable} />
     </div>
   );
 };

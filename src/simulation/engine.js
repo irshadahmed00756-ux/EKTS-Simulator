@@ -15,6 +15,12 @@ export function evaluateCircuit(nodes, edges) {
       }
       if (node.type === 'timer') {
         defaultData.isActive = false;
+        defaultData.isPowered = false;
+        defaultData.startSignal = false;
+        defaultData.resetSignal = false;
+      }
+      if (node.type === 'ssr') {
+        defaultData.isActive = false;
       }
       if (node.type === 'valve') {
         defaultData.solenoidA = false;
@@ -100,17 +106,25 @@ export function evaluateCircuit(nodes, edges) {
 
       if (currentNode.type === 'sensor') {
          if (currentNode.data.isTriggered) {
-            if (handleIn === 'in') outHandles.push('out');
+            if (handleIn === 'in' || handleIn === 'in_no') outHandles.push(handleIn === 'in' ? 'out' : 'out_no');
+         } else {
+            if (handleIn === 'in_nc') outHandles.push('out_nc');
          }
       }
 
       if (currentNode.type === 'timer') {
-         if (handleIn === 'in') {
-            currentNode.data.isActive = true;
-            if (currentNode.data.isDone) {
-               outHandles.push('out');
-            }
-         }
+         if (handleIn === 'A1') currentNode.data.isPowered = true;
+         if (handleIn === 'start') currentNode.data.startSignal = true;
+         if (handleIn === 'reset') currentNode.data.resetSignal = true;
+         
+         const isDone = currentNode.data.isDone;
+         if (isDone && handleIn === 'in_no') outHandles.push('out_no');
+         if (!isDone && handleIn === 'in_nc') outHandles.push('out_nc');
+      }
+
+      if (currentNode.type === 'ssr') {
+         if (handleIn === 'A1') currentNode.data.isActive = true;
+         if (currentNode.data.isActive && handleIn === 'in') outHandles.push('out');
       }
 
       if (currentNode.type === 'relayCoil') {
@@ -129,6 +143,9 @@ export function evaluateCircuit(nodes, edges) {
                currentNode.data.burned = true;
             }
          }
+         
+         if (currentNode.data.isActive && handleIn === 'in_no') outHandles.push('out_no');
+         if (!currentNode.data.isActive && handleIn === 'in_nc') outHandles.push('out_nc');
       }
 
       if (currentNode.type === 'relayContact') {
@@ -192,10 +209,20 @@ export function evaluateCircuit(nodes, edges) {
           let ticks = node.data.ticks || 0;
           let isDone = node.data.isDone || false;
           const targetSeconds = node.data.targetSeconds !== undefined ? node.data.targetSeconds : 2;
-          const targetTicks = Math.round(targetSeconds * 20); // 50ms per tick (20 ticks per second)
+          const targetTicks = Math.round(targetSeconds * 20);
 
-          if (subtype === 'ton' || subtype === 'star_delta') {
-             if (node.data.isActive) {
+          const isPowered = node.data.isPowered;
+          const startSignal = node.data.startSignal;
+          const resetSignal = node.data.resetSignal;
+
+          // Make the timer active (UI feedback) if startSignal is present
+          node.data.isActive = startSignal;
+
+          if (resetSignal) {
+             ticks = 0;
+             isDone = false;
+          } else if (subtype === 'ton' || subtype === 'star_delta') {
+             if (isPowered && startSignal) {
                 if (ticks < targetTicks) ticks++; 
                 if (ticks >= targetTicks) isDone = true;
              } else {
@@ -203,7 +230,7 @@ export function evaluateCircuit(nodes, edges) {
                 isDone = false;
              }
           } else if (subtype === 'tof') {
-             if (node.data.isActive) {
+             if (isPowered && startSignal) {
                 ticks = targetTicks;
                 isDone = true;
              } else {
@@ -211,6 +238,7 @@ export function evaluateCircuit(nodes, edges) {
                 if (ticks <= 0) isDone = false;
              }
           }
+
           return { ...node, data: { ...node.data, ticks, isDone } };
        }
        return node;
