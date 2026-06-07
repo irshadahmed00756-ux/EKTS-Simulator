@@ -118,7 +118,7 @@ export const RelayCoilNode = ({ data, isConnectable }) => {
   return (
     <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
       <Handle type="target" position={Position.Left} id="A1" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="target" position={Position.Right} id="A2" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="A2" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
       
       <Handle type="target" position={Position.Left} id="in_no" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
       <Handle type="source" position={Position.Right} id="out_no" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
@@ -147,7 +147,7 @@ export const SSRNode = ({ data, isConnectable }) => {
   return (
     <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
       <Handle type="target" position={Position.Left} id="A1" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="target" position={Position.Left} id="A2" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Left} id="A2" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
       
       <Handle type="target" position={Position.Right} id="in" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
       <Handle type="source" position={Position.Right} id="out" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
@@ -362,7 +362,7 @@ export const TimerNode = ({ data, isConnectable }) => {
     <div className={`custom-node electrical-node digital-timer-node ${isActive ? 'active' : ''}`} style={{ minWidth: 140 }}>
       {/* Power Pins */}
       <Handle type="target" position={Position.Left} id="A1" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="target" position={Position.Right} id="A2" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="A2" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
       
       {/* Input Pins */}
       <Handle type="target" position={Position.Left} id="start" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />

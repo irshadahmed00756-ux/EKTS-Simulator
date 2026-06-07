@@ -114,8 +114,23 @@ export function evaluateCircuit(nodes, edges) {
 
       if (currentNode.type === 'timer') {
          if (handleIn === 'A1') {
-            currentNode.data.isPowered = true;
-            outHandles.push('com'); // Com provides trigger power
+            const requiredSubtype = String(currentNode.data.subtype || '24v_dc');
+            // Extract voltage from subtype if possible, fallback to 220v_ac
+            const reqMatch = requiredSubtype.match(/\d+/);
+            const curMatch = currentVoltage.match(/\d+/);
+            const reqNum = reqMatch ? reqMatch[0] : (requiredSubtype.includes('24v') ? '24' : '220');
+            const curNum = curMatch ? curMatch[0] : null;
+            
+            if ((reqNum && reqNum === curNum) || 
+                (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
+                (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
+                (!requiredSubtype.includes('v'))) { // If no voltage specified in subtype, assume it works
+               currentNode.data.isPowered = true;
+               outHandles.push('com'); // Com provides trigger power
+               outHandles.push('A2');  // Complete circuit to Neutral
+            } else {
+               currentNode.data.burned = true;
+            }
          }
          if (handleIn === 'start') currentNode.data.startSignal = true;
          if (handleIn === 'reset') currentNode.data.resetSignal = true;
@@ -128,7 +143,10 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'ssr') {
-         if (handleIn === 'A1') currentNode.data.isActive = true;
+         if (handleIn === 'A1') {
+             currentNode.data.isActive = true;
+             outHandles.push('A2');
+         }
          if (currentNode.data.isActive && handleIn === 'in') outHandles.push('out');
       }
 
@@ -144,6 +162,7 @@ export function evaluateCircuit(nodes, edges) {
                 (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
                 (requiredSubtype.includes('ac') && currentVoltage.includes('ac'))) {
                currentNode.data.isActive = true;
+               outHandles.push('A2'); // Complete circuit to Neutral
             } else {
                currentNode.data.burned = true;
             }
@@ -226,7 +245,7 @@ export function evaluateCircuit(nodes, edges) {
           if (resetSignal) {
              ticks = 0;
              isDone = false;
-          } else if (subtype === 'ton' || subtype === 'star_delta') {
+          } else if (subtype.includes('ton') || subtype.includes('star_delta')) {
              if (isPowered && startSignal) {
                 if (ticks < targetTicks) ticks++; 
                 if (ticks >= targetTicks) isDone = true;
@@ -234,7 +253,7 @@ export function evaluateCircuit(nodes, edges) {
                 ticks = 0;
                 isDone = false;
              }
-          } else if (subtype === 'tof') {
+          } else if (subtype.includes('tof')) {
              if (isPowered && startSignal) {
                 ticks = targetTicks;
                 isDone = true;

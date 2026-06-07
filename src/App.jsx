@@ -64,9 +64,11 @@ const componentCategories = {
     { type: 'motor', config: { subtype: 'dc' }, name: 'DC Motor', domain: 'electrical', icon: Settings },
   ],
   'Timers & Logic': [
-    { type: 'timer', config: { subtype: 'ton', label: 'T1' }, name: 'ON-Delay Timer', domain: 'electrical', icon: Clock },
-    { type: 'timer', config: { subtype: 'tof', label: 'T2' }, name: 'OFF-Delay Timer', domain: 'electrical', icon: Clock },
-    { type: 'timer', config: { subtype: 'star_delta', label: 'K_SD' }, name: 'Star-Delta Timer', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'ton_24v_dc', label: 'T1', targetSeconds: 5 }, name: 'Timer ON-Delay 24V DC', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'ton_110v_ac', label: 'T2', targetSeconds: 5 }, name: 'Timer ON-Delay 110V AC', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'ton_220v_ac', label: 'T3', targetSeconds: 5 }, name: 'Timer ON-Delay 220V AC', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'tof_220v_ac', label: 'T4', targetSeconds: 5 }, name: 'Timer OFF-Delay 220V AC', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'star_delta_220v_ac', label: 'T5', targetSeconds: 5 }, name: 'Star-Delta Timer 220V AC', domain: 'electrical', icon: Clock },
   ],
   'Electrical (AC)': [
     { type: 'power', config: { subtype: '220v_ac' }, name: '220V AC Phase', domain: 'electrical', icon: Zap },
