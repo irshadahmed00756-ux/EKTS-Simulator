@@ -426,6 +426,20 @@ function SimulatorApp() {
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 5 }}>Components with the same label are physically linked.</p>
                     </div>
                   )}
+
+                  {node.type === 'timer' && (
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Delay Time (Seconds)</label>
+                      <input 
+                        type="number" 
+                        step="0.5"
+                        min="0.5"
+                        value={node.data.targetSeconds !== undefined ? node.data.targetSeconds : 2} 
+                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, targetSeconds: parseFloat(e.target.value) || 0 } } : n))}
+                        style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </>

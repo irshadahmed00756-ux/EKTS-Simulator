@@ -191,7 +191,8 @@ export function evaluateCircuit(nodes, edges) {
           const subtype = node.data.subtype || 'ton';
           let ticks = node.data.ticks || 0;
           let isDone = node.data.isDone || false;
-          const targetTicks = node.data.targetTicks || 40; // ~2 seconds at 50ms per tick
+          const targetSeconds = node.data.targetSeconds !== undefined ? node.data.targetSeconds : 2;
+          const targetTicks = Math.round(targetSeconds * 20); // 50ms per tick (20 ticks per second)
 
           if (subtype === 'ton' || subtype === 'star_delta') {
              if (node.data.isActive) {
