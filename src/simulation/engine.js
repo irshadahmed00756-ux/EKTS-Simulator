@@ -121,8 +121,10 @@ export function evaluateCircuit(nodes, edges) {
          if (handleIn === 'reset') currentNode.data.resetSignal = true;
          
          const isDone = currentNode.data.isDone;
-         if (isDone && handleIn === 'in_no') outHandles.push('out_no');
-         if (!isDone && handleIn === 'in_nc') outHandles.push('out_nc');
+         if (handleIn === 'contact_com') {
+             if (isDone) outHandles.push('no');
+             if (!isDone) outHandles.push('nc');
+         }
       }
 
       if (currentNode.type === 'ssr') {

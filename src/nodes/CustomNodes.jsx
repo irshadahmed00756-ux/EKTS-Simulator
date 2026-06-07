@@ -375,16 +375,14 @@ export const TimerNode = ({ data, isConnectable }) => {
       <div style={{ position: 'absolute', left: '-23px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>Com</div>
 
       {/* Output Contact Pins */}
-      <Handle type="target" position={Position.Right} id="in_no" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="source" position={Position.Right} id="out_no" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="target" position={Position.Right} id="in_nc" style={{ top: 100 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="source" position={Position.Right} id="out_nc" style={{ top: 125 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Right} id="contact_com" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="no" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="nc" style={{ top: 100 }} className="port electrical-port" isConnectable={isConnectable} />
 
       <div style={{ position: 'absolute', right: '-15px', top: '20px', fontSize: '8px', color: 'var(--text-muted)' }}>A2</div>
-      <div style={{ position: 'absolute', right: '-25px', top: '45px', fontSize: '8px', color: 'var(--text-muted)' }}>NO in</div>
-      <div style={{ position: 'absolute', right: '-28px', top: '70px', fontSize: '8px', color: 'var(--text-muted)' }}>NO out</div>
-      <div style={{ position: 'absolute', right: '-25px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>NC in</div>
-      <div style={{ position: 'absolute', right: '-28px', top: '120px', fontSize: '8px', color: 'var(--text-muted)' }}>NC out</div>
+      <div style={{ position: 'absolute', right: '-22px', top: '45px', fontSize: '8px', color: 'var(--text-muted)' }}>Com</div>
+      <div style={{ position: 'absolute', right: '-18px', top: '70px', fontSize: '8px', color: 'var(--text-muted)' }}>NO</div>
+      <div style={{ position: 'absolute', right: '-18px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>NC</div>
 
       <div className="node-header">
         <Clock size={14} color={isDone ? '#00ff00' : 'currentColor'} /> {data.label || 'Timer'}
