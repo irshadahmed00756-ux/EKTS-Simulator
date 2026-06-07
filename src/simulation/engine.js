@@ -252,9 +252,10 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'ground') {
-         currentNode.data.shortCircuit = true;
-         globalShortCircuit = true;
-         shortCircuitDetails = "Power connected directly to Ground without Load!";
+         // User requested to disable "Power connected directly to Ground" alarm so they can run logic circuits freely
+         // currentNode.data.shortCircuit = true;
+         // globalShortCircuit = true;
+         // shortCircuitDetails = "Power connected directly to Ground without Load!";
       }
 
       // Treat the incoming port as a junction itself (all wires on the same port are shorted together)
