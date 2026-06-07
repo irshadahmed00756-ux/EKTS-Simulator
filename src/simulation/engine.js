@@ -137,7 +137,7 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'timer') {
-         if (handleIn === 'A1') {
+         if (handleIn === 'A1' || handleIn === 'A2') {
             const requiredSubtype = String(currentNode.data.subtype || '24v_dc');
             const reqMatch = requiredSubtype.match(/\d+/);
             const curMatch = currentVoltage.match(/\d+/);
@@ -167,7 +167,7 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'ssr') {
-         if (handleIn === 'A1') {
+         if (handleIn === 'A1' || handleIn === 'A2') {
              currentNode.data.isActive = true;
          }
          if (currentNode.data.isActive) {
@@ -177,7 +177,7 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'relayCoil') {
-         if (handleIn === 'A1') {
+         if (handleIn === 'A1' || handleIn === 'A2') {
             const requiredSubtype = String(currentNode.data.subtype || 'coil_24v');
             const reqMatch = requiredSubtype.match(/\d+/);
             const curMatch = currentVoltage.match(/\d+/);
