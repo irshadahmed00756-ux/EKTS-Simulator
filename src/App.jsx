@@ -518,7 +518,7 @@ function SimulatorApp() {
                     <input type="text" value={node.id} disabled style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} />
                   </div>
                   
-                  {['relayCoil', 'relayContact', 'switch', 'sensor', 'timer', 'motor', 'lamp'].includes(node.type) && (
+                  {['relayCoil', 'relayContact', 'switch', 'sensor', 'timer', 'motor', 'lamp', 'cylinder'].includes(node.type) && (
                     <div className="form-group" style={{ marginBottom: 15 }}>
                       <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Label (Tag)</label>
                       <input 
@@ -555,6 +555,30 @@ function SimulatorApp() {
                           <option value="power_on">1. Power ON (Active on Supply)</option>
                           <option value="signal_on">2. Signal ON (Pulse/Short Start)</option>
                         </select>
+                      </div>
+                  )}
+                  
+                  {node.type === 'cylinder' && (
+                    <>
+                      <div className="form-group" style={{ marginBottom: 15 }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Limit Switch at 0% (Retracted)</label>
+                        <input 
+                          type="text" 
+                          value={node.data.limit0Label || ''} 
+                          onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limit0Label: e.target.value } } : n))}
+                          placeholder="e.g. LS1"
+                          style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
+                        />
+                      </div>
+                      <div className="form-group" style={{ marginBottom: 15 }}>
+                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Limit Switch at 100% (Extended)</label>
+                        <input 
+                          type="text" 
+                          value={node.data.limit100Label || ''} 
+                          onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limit100Label: e.target.value } } : n))}
+                          placeholder="e.g. LS2"
+                          style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
+                        />
                       </div>
                     </>
                   )}

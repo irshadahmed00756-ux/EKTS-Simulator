@@ -340,7 +340,17 @@ export const CylinderNode = ({ data, isConnectable }) => {
   const portClass = domain === 'hydraulic' ? 'hydraulic-port' : 'pneumatic-port';
 
   return (
-    <div className={`custom-node ${nodeClass}`}>
+    <div className={`custom-node ${nodeClass}`} style={{ minWidth: 120 }}>
+      {data.limit0Label && (
+        <div style={{ position: 'absolute', top: -15, left: '10%', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
+          | {data.limit0Label}
+        </div>
+      )}
+      {data.limit100Label && (
+        <div style={{ position: 'absolute', top: -15, right: '10%', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
+          {data.limit100Label} |
+        </div>
+      )}
       <div className="node-header">
         <ArrowLeftRight size={14} /> {data.label || 'Cylinder'}
       </div>

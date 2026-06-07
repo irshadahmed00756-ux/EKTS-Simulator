@@ -43,7 +43,22 @@ export function evaluateCircuit(nodes, edges) {
 
     const getNode = (id) => newNodes.find(n => n.id === id);
 
-    let poweredEdgeIds = new Set();
+    // --- MECHANICAL LINKAGE PASS ---
+    const cylinders = newNodes.filter(n => n.type === 'cylinder');
+    newNodes.forEach(node => {
+       if (node.type === 'sensor' && node.data.subtype === 'limit' && node.data.label) {
+          let mechanicallyTriggered = false;
+          cylinders.forEach(cyl => {
+             const ext = cyl.data.extension || 0;
+             if (cyl.data.limit0Label === node.data.label && ext <= 0) mechanicallyTriggered = true;
+             if (cyl.data.limit100Label === node.data.label && ext >= 100) mechanicallyTriggered = true;
+          });
+          node.data.isTriggered = mechanicallyTriggered;
+       }
+    });
+    // -------------------------------
+
+    const poweredEdgeIds = new Set();
     let edgeVoltages = new Map(); // edge.id -> Set<voltage>
 
     const activeCoilLabels = new Set();
