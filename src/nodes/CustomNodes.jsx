@@ -267,11 +267,11 @@ export const ValveNode = ({ data, isConnectable }) => {
   const domain = data.domain || 'pneumatic';
   const nodeClass = domain === 'hydraulic' ? 'hydraulic-node' : 'pneumatic-node';
   const portClass = domain === 'hydraulic' ? 'hydraulic-port' : 'pneumatic-port';
-  const is43 = subtype.includes('4_3');
+  const is4Port = subtype.includes('4_3') || subtype.includes('4_2');
 
   return (
-    <div className={`custom-node ${nodeClass}`} style={{ minWidth: is43 ? 120 : 100 }}>
-      {is43 ? (
+    <div className={`custom-node ${nodeClass}`} style={{ minWidth: is4Port ? 120 : 100 }}>
+      {is4Port ? (
         <>
           {/* Top ports: A, B */}
           <Handle type="source" position={Position.Top} id="A" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
