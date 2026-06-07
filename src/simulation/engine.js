@@ -36,9 +36,23 @@ export function evaluateCircuit(nodes, edges) {
     let poweredEdgeIds = new Set();
     const activeCoilLabels = new Set();
     nodes.forEach(n => {
-       // Support label linkage for Relay Coils AND Timers!
-       if ((n.type === 'relayCoil' || n.type === 'timer') && n.data.isActive && n.data.label) {
+       if (n.type === 'relayCoil' && n.data.isActive && n.data.label) {
           activeCoilLabels.add(n.data.label);
+       }
+       if (n.type === 'timer' && n.data.label) {
+          if (n.data.subtype === 'ton' && n.data.isDone) {
+             activeCoilLabels.add(n.data.label);
+          }
+          if (n.data.subtype === 'tof' && n.data.isDone) {
+             activeCoilLabels.add(n.data.label);
+          }
+          if (n.data.subtype === 'star_delta') {
+             if (n.data.isActive && !n.data.isDone) {
+                activeCoilLabels.add(n.data.label + '_STAR');
+             } else if (n.data.isDone) {
+                activeCoilLabels.add(n.data.label + '_DELTA');
+             }
+          }
        }
     });
 
@@ -177,18 +191,19 @@ export function evaluateCircuit(nodes, edges) {
           const subtype = node.data.subtype || 'ton';
           let ticks = node.data.ticks || 0;
           let isDone = node.data.isDone || false;
+          const targetTicks = node.data.targetTicks || 40; // ~2 seconds at 50ms per tick
 
-          if (subtype === 'ton') {
+          if (subtype === 'ton' || subtype === 'star_delta') {
              if (node.data.isActive) {
-                if (ticks < 40) ticks++; 
-                if (ticks >= 40) isDone = true;
+                if (ticks < targetTicks) ticks++; 
+                if (ticks >= targetTicks) isDone = true;
              } else {
                 ticks = 0;
                 isDone = false;
              }
           } else if (subtype === 'tof') {
              if (node.data.isActive) {
-                ticks = 40;
+                ticks = targetTicks;
                 isDone = true;
              } else {
                 if (ticks > 0) ticks--;

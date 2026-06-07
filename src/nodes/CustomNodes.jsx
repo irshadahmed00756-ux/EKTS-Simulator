@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Zap, Circle, PackageOpen, Lightbulb, Activity, ArrowRight, ArrowLeftRight, Power, Settings, Fan, Droplet, Cloud } from 'lucide-react';
+import { Zap, Circle, PackageOpen, Lightbulb, Activity, ArrowRight, ArrowLeftRight, Power, Settings, Fan, Droplet, Cloud, Clock } from 'lucide-react';
 import './nodes.css';
 
 export const JunctionNode = ({ isConnectable }) => {
@@ -338,14 +338,32 @@ export const TimerNode = ({ data, isConnectable }) => {
   );
 };
 
-export const SensorNode = ({ data, isConnectable }) => {
+export const SensorNode = ({ id, data, isConnectable }) => {
   const isTriggered = data.isTriggered || false;
   const subtype = data.subtype || 'limit';
+  const { setNodes } = useReactFlow();
+
+  const handlePointerDown = (e) => {
+    e.stopPropagation();
+    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, isTriggered: true } } : n));
+  };
+
+  const handlePointerUp = (e) => {
+    e.stopPropagation();
+    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, isTriggered: false } } : n));
+  };
+
   return (
-    <div className={`custom-node electrical-node ${isTriggered ? 'active' : ''}`}>
+    <div 
+      className={`custom-node electrical-node ${isTriggered ? 'active' : ''}`}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      style={{ cursor: 'pointer' }}
+    >
       <Handle type="target" position={Position.Left} id="in" className="port electrical-port" isConnectable={isConnectable} />
       <div className="node-header">
-        <Circle size={14} /> {data.label || 'Sensor'}
+        <Circle size={14} /> {data.label || 'Limit SW'}
       </div>
       <div className="node-body">
         <div className="coil-visual" style={{ borderColor: isTriggered ? '#00ff00' : 'var(--border-strong)', color: isTriggered ? '#00ff00' : 'inherit' }}>
