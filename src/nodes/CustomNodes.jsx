@@ -12,7 +12,7 @@ export const JunctionNode = ({ isConnectable }) => {
   );
 };
 
-export const PowerNode = ({ data }) => {
+export const PowerNode = ({ data, isConnectable }) => {
   const subtype = data.subtype || '24v_dc';
   let label = 'Power Supply';
   if (subtype === '24v_dc') label = '+24V DC';
@@ -27,9 +27,25 @@ export const PowerNode = ({ data }) => {
         <Zap size={14} /> {label}
       </div>
       <div className="node-body">
-        <div className="port-label">Out</div>
+        {subtype === '3phase' ? (
+           <div style={{ display: 'flex', flexDirection: 'column', gap: 15, width: '100%', alignItems: 'flex-end', paddingRight: 5, fontSize: '10px' }}>
+              <div>L1</div>
+              <div>L2</div>
+              <div>L3</div>
+           </div>
+        ) : (
+           <div className="port-label">Out</div>
+        )}
       </div>
-      <Handle type="source" position={Position.Right} id="out" className="port electrical-port" />
+      {subtype === '3phase' ? (
+         <>
+           <Handle type="source" position={Position.Right} id="L1" style={{ top: 35 }} className="port electrical-port" isConnectable={isConnectable} />
+           <Handle type="source" position={Position.Right} id="L2" style={{ top: 55 }} className="port electrical-port" isConnectable={isConnectable} />
+           <Handle type="source" position={Position.Right} id="L3" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
+         </>
+      ) : (
+         <Handle type="source" position={Position.Right} id="out" className="port electrical-port" isConnectable={isConnectable} />
+      )}
     </div>
   );
 };
@@ -115,8 +131,10 @@ export const SwitchNode = ({ id, data, isConnectable }) => {
 
 export const RelayCoilNode = ({ data, isConnectable }) => {
   const isActive = data.isActive || false;
+  const isBurned = data.burned || false;
+  
   return (
-    <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
+    <div className={`custom-node electrical-node ${isActive ? 'active' : ''} ${isBurned ? 'burned' : ''}`}>
       <Handle type="target" position={Position.Left} id="A1" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
       <Handle type="source" position={Position.Right} id="A2" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
       
@@ -130,12 +148,18 @@ export const RelayCoilNode = ({ data, isConnectable }) => {
         <PackageOpen size={14} /> {data.label || 'K1'}
       </div>
       <div className="node-body">
-        <div className="coil-visual">
-          {isActive ? 'ENERGIZED' : 'IDLE'}
-        </div>
+        {isBurned ? (
+          <div className="coil-visual" style={{ background: '#ff000044', color: '#ff0000', borderColor: '#ff0000' }}>
+            BURNED OUT
+          </div>
+        ) : (
+          <div className="coil-visual">
+            {isActive ? 'ENERGIZED' : 'IDLE'}
+          </div>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8, fontSize: '10px', color: 'var(--text-muted)' }}>
-          <div>NO: {isActive ? 'Closed' : 'Open'}</div>
-          <div>NC: {isActive ? 'Open' : 'Closed'}</div>
+          <div>NO: {isActive && !isBurned ? 'Closed' : 'Open'}</div>
+          <div>NC: {isActive && !isBurned ? 'Open' : 'Closed'}</div>
         </div>
       </div>
     </div>
@@ -146,19 +170,27 @@ export const SSRNode = ({ data, isConnectable }) => {
   const isActive = data.isActive || false;
   return (
     <div className={`custom-node electrical-node ${isActive ? 'active' : ''}`}>
-      <Handle type="target" position={Position.Left} id="A1" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="source" position={Position.Left} id="A2" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="A1" style={{ top: 30 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Left} id="A2" style={{ top: 60 }} className="port electrical-port" isConnectable={isConnectable} />
       
-      <Handle type="target" position={Position.Right} id="in" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="source" position={Position.Right} id="out" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Right} id="in" style={{ top: 30 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out" style={{ top: 60 }} className="port electrical-port" isConnectable={isConnectable} />
       
       <div className="node-header">
         <PackageOpen size={14} /> {data.label || 'SSR'}
       </div>
-      <div className="node-body">
-        <div className="coil-visual" style={{ background: isActive ? '#00ff0022' : 'transparent', borderColor: isActive ? '#00ff00' : 'var(--border-strong)', color: isActive ? '#00ff00' : 'inherit' }}>
-          {isActive ? 'ON' : 'OFF'}
-        </div>
+      <div className="node-body" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', fontSize: '10px' }}>
+         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, paddingLeft: 2, justifyContent: 'center' }}>
+            <div>A1</div>
+            <div>A2</div>
+         </div>
+         <div className="coil-visual" style={{ margin: 'auto', background: isActive ? '#00ff0022' : 'transparent', borderColor: isActive ? '#00ff00' : 'var(--border-strong)', color: isActive ? '#00ff00' : 'inherit' }}>
+           {isActive ? 'ON' : 'OFF'}
+         </div>
+         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, paddingRight: 2, alignItems: 'flex-end', justifyContent: 'center' }}>
+            <div>IN</div>
+            <div>OUT</div>
+         </div>
       </div>
     </div>
   );
@@ -235,41 +267,67 @@ export const ValveNode = ({ data, isConnectable }) => {
   const domain = data.domain || 'pneumatic';
   const nodeClass = domain === 'hydraulic' ? 'hydraulic-node' : 'pneumatic-node';
   const portClass = domain === 'hydraulic' ? 'hydraulic-port' : 'pneumatic-port';
+  const is43 = subtype.includes('4_3');
 
   return (
-    <div className={`custom-node ${nodeClass}`}>
-      <Handle type="target" position={Position.Left} id="P" className={`port ${portClass}`} isConnectable={isConnectable} />
-      {subtype === '5_2' || subtype === '5_3' ? (
+    <div className={`custom-node ${nodeClass}`} style={{ minWidth: is43 ? 120 : 100 }}>
+      {is43 ? (
         <>
-          <Handle type="target" position={Position.Left} id="R" style={{ top: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-          <Handle type="target" position={Position.Left} id="S" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          {/* Top ports: A, B */}
+          <Handle type="source" position={Position.Top} id="A" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', top: -18, left: '30%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>A</div>
+          
+          <Handle type="source" position={Position.Top} id="B" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', top: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>B</div>
+
+          {/* Bottom ports: P, T */}
+          <Handle type="target" position={Position.Bottom} id="P" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '30%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
+          
+          <Handle type="target" position={Position.Bottom} id="T" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>T</div>
+          
+          {/* Solenoids */}
+          <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
+          
+          <Handle type="target" position={Position.Right} id="solenoid_b" className="port electrical-port" isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-B</div>
         </>
-      ) : null}
-      {(subtype === '4_2' || subtype.includes('4_3')) ? (
-        <Handle type="target" position={Position.Left} id="T" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-      ) : null}
+      ) : (
+        <>
+          <Handle type="target" position={Position.Left} id="P" className={`port ${portClass}`} isConnectable={isConnectable} />
+          {subtype === '5_2' || subtype === '5_3' ? (
+            <>
+              <Handle type="target" position={Position.Left} id="R" style={{ top: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
+              <Handle type="target" position={Position.Left} id="S" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
+            </>
+          ) : null}
+          {(subtype === '4_2') ? (
+            <Handle type="target" position={Position.Left} id="T" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          ) : null}
+          <Handle type="source" position={Position.Right} id="A" style={{ top: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          {subtype !== '3_2' ? (
+            <Handle type="source" position={Position.Right} id="B" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          ) : null}
+          <Handle type="target" position={Position.Bottom} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
+        </>
+      )}
 
       <div className="node-header">
         <ArrowRight size={14} /> {data.label || 'Valve'}
       </div>
       <div className="node-body">
-        <div className="valve-ports">
-          <div className="valve-top">
-            {(subtype === '3_2') ? (
-              <Handle type="source" position={Position.Top} id="A" className={`port ${portClass}`} isConnectable={isConnectable} />
-            ) : (
-              <>
-                <Handle type="source" position={Position.Top} id="A" style={{ left: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-                <Handle type="source" position={Position.Top} id="B" style={{ left: 'auto', right: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-              </>
-            )}
-          </div>
+        <div className="valve-symbol">
+          {data.solenoidA ? (
+            <span style={{ color: 'var(--color-electrical)', fontWeight: 'bold' }}>SHIFT A</span>
+          ) : data.solenoidB ? (
+            <span style={{ color: 'var(--color-electrical)', fontWeight: 'bold' }}>SHIFT B</span>
+          ) : (
+            <span>CENTER</span>
+          )}
         </div>
       </div>
-      <Handle type="target" position={Position.Right} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
-      {subtype.includes('3') ? (
-         <Handle type="target" position={Position.Right} id="solenoid_b" style={{ top: 40 }} className="port electrical-port" isConnectable={isConnectable} />
-      ) : null}
     </div>
   );
 };

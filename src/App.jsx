@@ -200,8 +200,17 @@ function SimulatorApp() {
         try {
           const currentNodes = nodesRef.current;
           const currentEdges = edgesRef.current;
-          const { newNodes, poweredEdgeIds } = evaluateCircuit(currentNodes, currentEdges);
+          const { newNodes, poweredEdgeIds, globalShortCircuit, shortCircuitDetails } = evaluateCircuit(currentNodes, currentEdges);
           
+          if (globalShortCircuit) {
+             clearInterval(simInterval.current);
+             setIsSimulating(false);
+             alert("🚨 SHORT CIRCUIT DETECTED! 🚨\n" + (shortCircuitDetails || "Invalid connection."));
+             // Reset visual powered state for safety
+             setEdges(eds => eds.map(e => ({ ...e, animated: false, style: { ...e.style, stroke: 'var(--border-strong)' } })));
+             return;
+          }
+
           setNodes(newNodes);
           setEdges((eds) => eds.map(e => {
             const isPowered = poweredEdgeIds.has(e.id);
@@ -480,6 +489,7 @@ function SimulatorApp() {
             nodesConnectable={!isSimulating}
             elementsSelectable={!isSimulating}
             connectionLineType="orthogonal"
+            connectionMode="loose"
             fitView
             minZoom={0.2}
             maxZoom={2}

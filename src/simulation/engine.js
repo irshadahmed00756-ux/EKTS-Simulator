@@ -3,6 +3,9 @@
 
 export function evaluateCircuit(nodes, edges) {
   try {
+    let globalShortCircuit = false;
+    let shortCircuitDetails = "";
+
     let newNodes = nodes.map(node => {
       let defaultData = { ...node.data };
       
@@ -18,6 +21,7 @@ export function evaluateCircuit(nodes, edges) {
         defaultData.isPowered = false;
         defaultData.startSignal = false;
         defaultData.resetSignal = false;
+        defaultData.burned = false;
       }
       if (node.type === 'ssr') {
         defaultData.isActive = false;
@@ -40,6 +44,8 @@ export function evaluateCircuit(nodes, edges) {
     const getNode = (id) => newNodes.find(n => n.id === id);
 
     let poweredEdgeIds = new Set();
+    let edgeVoltages = new Map(); // edge.id -> Set<voltage>
+
     const activeCoilLabels = new Set();
     nodes.forEach(n => {
        if (n.type === 'relayCoil' && n.data.isActive && n.data.label) {
@@ -63,7 +69,17 @@ export function evaluateCircuit(nodes, edges) {
     });
 
     const powerNodes = newNodes.filter(n => n.type === 'power');
-    let queue = powerNodes.map(n => ({ id: n.id, voltage: n.data.subtype || '24v_dc', handleIn: 'internal' }));
+    let queue = [];
+    powerNodes.forEach(n => {
+       if (n.data.subtype === '3phase') {
+          queue.push({ id: n.id, voltage: 'L1', handleIn: 'internal_L1' });
+          queue.push({ id: n.id, voltage: 'L2', handleIn: 'internal_L2' });
+          queue.push({ id: n.id, voltage: 'L3', handleIn: 'internal_L3' });
+       } else {
+          queue.push({ id: n.id, voltage: n.data.subtype || '24v_dc', handleIn: 'internal' });
+       }
+    });
+    
     let visited = new Set();
 
     while (queue.length > 0) {
@@ -82,7 +98,10 @@ export function evaluateCircuit(nodes, edges) {
       let outHandles = [];
 
       if (currentNode.type === 'power') {
-        outHandles.push('out');
+         if (handleIn === 'internal_L1') outHandles.push('L1');
+         else if (handleIn === 'internal_L2') outHandles.push('L2');
+         else if (handleIn === 'internal_L3') outHandles.push('L3');
+         else outHandles.push('out');
       }
 
       if (currentNode.type === 'junction') {
@@ -115,7 +134,6 @@ export function evaluateCircuit(nodes, edges) {
       if (currentNode.type === 'timer') {
          if (handleIn === 'A1') {
             const requiredSubtype = String(currentNode.data.subtype || '24v_dc');
-            // Extract voltage from subtype if possible, fallback to 220v_ac
             const reqMatch = requiredSubtype.match(/\d+/);
             const curMatch = currentVoltage.match(/\d+/);
             const reqNum = reqMatch ? reqMatch[0] : (requiredSubtype.includes('24v') ? '24' : '220');
@@ -124,9 +142,9 @@ export function evaluateCircuit(nodes, edges) {
             if ((reqNum && reqNum === curNum) || 
                 (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
                 (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
-                (!requiredSubtype.includes('v'))) { // If no voltage specified in subtype, assume it works
+                (!requiredSubtype.includes('v'))) { 
                currentNode.data.isPowered = true;
-               outHandles.push('com'); // Com provides trigger power
+               outHandles.push('com'); 
             } else {
                currentNode.data.burned = true;
             }
@@ -134,7 +152,6 @@ export function evaluateCircuit(nodes, edges) {
          if (handleIn === 'start') currentNode.data.startSignal = true;
          if (handleIn === 'reset') currentNode.data.resetSignal = true;
          
-         // Fix: Use previous tick's state for contacts to prevent BFS evaluation order bugs
          const originalTimerNode = nodes.find(n => n.id === currentId) || currentNode;
          const isDone = originalTimerNode.data.isDone;
          if (handleIn === 'contact_com') {
@@ -167,7 +184,6 @@ export function evaluateCircuit(nodes, edges) {
             }
          }
          
-         // Fix: Use previous tick's state for contacts to prevent BFS evaluation order bugs
          const originalCoilNode = nodes.find(n => n.id === currentId) || currentNode;
          const isCoilActive = originalCoilNode.data.isActive;
          
@@ -183,7 +199,7 @@ export function evaluateCircuit(nodes, edges) {
          if (subtype === 'no' && isCoilActive) isClosed = true;
          if (subtype === 'nc' && !isCoilActive) isClosed = true;
          
-         currentNode.data.isActive = isClosed; // Just for visual feedback if needed
+         currentNode.data.isActive = isClosed; 
          
          if (isClosed) {
             if (handleIn === 'in') outHandles.push('out');
@@ -217,17 +233,31 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'ground') {
-         // Power reached ground directly! Short circuit!
          currentNode.data.shortCircuit = true;
+         globalShortCircuit = true;
+         shortCircuitDetails = "Power connected directly to Ground without Load!";
       }
 
       for (const oh of outHandles) {
          const outgoingEdges = (edges || []).filter(e => e.source === currentId && e.sourceHandle === oh);
          for (const edge of outgoingEdges) {
             poweredEdgeIds.add(edge.id);
+            
+            if (!edgeVoltages.has(edge.id)) edgeVoltages.set(edge.id, new Set());
+            edgeVoltages.get(edge.id).add(currentVoltage);
+
             queue.push({ id: edge.target, voltage: currentVoltage, handleIn: edge.targetHandle });
          }
       }
+    }
+    
+    // Check for Voltage Clash Short Circuits
+    for (const [edgeId, voltages] of edgeVoltages.entries()) {
+       if (voltages.size > 1) {
+          globalShortCircuit = true;
+          shortCircuitDetails = `Voltage Clash! (${Array.from(voltages).join(' touching ')})`;
+          break; // One global short is enough to crash the circuit
+       }
     }
 
     newNodes = newNodes.map(node => {
@@ -415,7 +445,7 @@ export function evaluateCircuit(nodes, edges) {
       return originalNode;
     });
 
-    return { newNodes: finalNodes, poweredEdgeIds };
+    return { newNodes: finalNodes, poweredEdgeIds, globalShortCircuit, shortCircuitDetails };
   } catch (err) {
     console.error("Critical Engine Error Caught Internally:", err);
     if (!window.hasAlertedEngineError) {
