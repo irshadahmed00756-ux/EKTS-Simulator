@@ -117,8 +117,11 @@ export function evaluateCircuit(nodes, edges) {
 
         if (visualState) {
           if (handleIn === 'in') outHandles.push('out');
+          else if (handleIn === 'out') outHandles.push('in');
           else if (handleIn && typeof handleIn === 'string' && handleIn.startsWith('in_')) {
             outHandles.push(handleIn.replace('in_', 'out_'));
+          } else if (handleIn && typeof handleIn === 'string' && handleIn.startsWith('out_')) {
+            outHandles.push(handleIn.replace('out_', 'in_'));
           }
         }
       }
@@ -126,8 +129,10 @@ export function evaluateCircuit(nodes, edges) {
       if (currentNode.type === 'sensor') {
          if (currentNode.data.isTriggered) {
             if (handleIn === 'in' || handleIn === 'in_no') outHandles.push(handleIn === 'in' ? 'out' : 'out_no');
+            if (handleIn === 'out' || handleIn === 'out_no') outHandles.push(handleIn === 'out' ? 'in' : 'in_no');
          } else {
             if (handleIn === 'in_nc') outHandles.push('out_nc');
+            if (handleIn === 'out_nc') outHandles.push('in_nc');
          }
       }
 
@@ -158,13 +163,18 @@ export function evaluateCircuit(nodes, edges) {
              if (isDone) outHandles.push('no');
              if (!isDone) outHandles.push('nc');
          }
+         if (handleIn === 'no' && isDone) outHandles.push('contact_com');
+         if (handleIn === 'nc' && !isDone) outHandles.push('contact_com');
       }
 
       if (currentNode.type === 'ssr') {
          if (handleIn === 'A1') {
              currentNode.data.isActive = true;
          }
-         if (currentNode.data.isActive && handleIn === 'in') outHandles.push('out');
+         if (currentNode.data.isActive) {
+             if (handleIn === 'in') outHandles.push('out');
+             if (handleIn === 'out') outHandles.push('in');
+         }
       }
 
       if (currentNode.type === 'relayCoil') {
@@ -187,8 +197,13 @@ export function evaluateCircuit(nodes, edges) {
          const originalCoilNode = nodes.find(n => n.id === currentId) || currentNode;
          const isCoilActive = originalCoilNode.data.isActive;
          
-         if (isCoilActive && handleIn === 'in_no') outHandles.push('out_no');
-         if (!isCoilActive && handleIn === 'in_nc') outHandles.push('out_nc');
+         if (isCoilActive) {
+            if (handleIn === 'in_no') outHandles.push('out_no');
+            if (handleIn === 'out_no') outHandles.push('in_no');
+         } else {
+            if (handleIn === 'in_nc') outHandles.push('out_nc');
+            if (handleIn === 'out_nc') outHandles.push('in_nc');
+         }
       }
 
       if (currentNode.type === 'relayContact') {
@@ -203,10 +218,15 @@ export function evaluateCircuit(nodes, edges) {
          
          if (isClosed) {
             if (handleIn === 'in') outHandles.push('out');
+            else if (handleIn === 'out') outHandles.push('in');
             else if (handleIn && typeof handleIn === 'string' && handleIn.startsWith('in_')) {
                outHandles.push(handleIn.replace('in_', 'out_'));
+            } else if (handleIn && typeof handleIn === 'string' && handleIn.startsWith('out_')) {
+               outHandles.push(handleIn.replace('out_', 'in_'));
             } else if (handleIn && typeof handleIn === 'string' && handleIn.startsWith('L')) {
                outHandles.push(handleIn.replace('L', 'T'));
+            } else if (handleIn && typeof handleIn === 'string' && handleIn.startsWith('T')) {
+               outHandles.push(handleIn.replace('T', 'L'));
             }
          }
       }
