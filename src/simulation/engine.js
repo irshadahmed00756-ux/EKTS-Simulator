@@ -134,7 +134,9 @@ export function evaluateCircuit(nodes, edges) {
          if (handleIn === 'start') currentNode.data.startSignal = true;
          if (handleIn === 'reset') currentNode.data.resetSignal = true;
          
-         const isDone = currentNode.data.isDone;
+         // Fix: Use previous tick's state for contacts to prevent BFS evaluation order bugs
+         const originalTimerNode = nodes.find(n => n.id === currentId) || currentNode;
+         const isDone = originalTimerNode.data.isDone;
          if (handleIn === 'contact_com') {
              if (isDone) outHandles.push('no');
              if (!isDone) outHandles.push('nc');
@@ -165,8 +167,12 @@ export function evaluateCircuit(nodes, edges) {
             }
          }
          
-         if (currentNode.data.isActive && handleIn === 'in_no') outHandles.push('out_no');
-         if (!currentNode.data.isActive && handleIn === 'in_nc') outHandles.push('out_nc');
+         // Fix: Use previous tick's state for contacts to prevent BFS evaluation order bugs
+         const originalCoilNode = nodes.find(n => n.id === currentId) || currentNode;
+         const isCoilActive = originalCoilNode.data.isActive;
+         
+         if (isCoilActive && handleIn === 'in_no') outHandles.push('out_no');
+         if (!isCoilActive && handleIn === 'in_nc') outHandles.push('out_nc');
       }
 
       if (currentNode.type === 'relayContact') {
