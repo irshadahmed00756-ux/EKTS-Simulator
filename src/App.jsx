@@ -548,7 +548,7 @@ function SimulatorApp() {
                       <div className="form-group" style={{ marginBottom: 15 }}>
                         <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Trigger Mode</label>
                         <select 
-                          value={node.data.triggerMode || 'signal_on'} 
+                          value={node.data.triggerMode || 'power_on'} 
                           onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, triggerMode: e.target.value } } : n))}
                           style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
                         >

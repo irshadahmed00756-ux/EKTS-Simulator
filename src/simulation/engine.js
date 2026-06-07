@@ -308,7 +308,7 @@ export function evaluateCircuit(nodes, edges) {
           const resetSignal = node.data.resetSignal;
 
           let isTiming = node.data.isTiming || false;
-          let triggerMode = node.data.triggerMode || 'signal_on';
+          const triggerMode = node.data.triggerMode || 'power_on';
 
           if (resetSignal) {
              isTiming = false;

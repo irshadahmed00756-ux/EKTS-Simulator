@@ -411,13 +411,14 @@ export const TankNode = ({ data, isConnectable }) => {
 export const TimerNode = ({ data, isConnectable }) => {
   const isActive = data.isActive || false;
   const isDone = data.isDone || false;
+  const isBurned = data.burned || false;
   const subtype = data.subtype || 'ton';
   const targetSeconds = data.targetSeconds !== undefined ? data.targetSeconds : 2.0;
   const currentTicks = data.ticks || 0;
   const currentSeconds = (currentTicks / 20).toFixed(1);
 
   return (
-    <div className={`custom-node electrical-node digital-timer-node ${isActive ? 'active' : ''}`} style={{ minWidth: 140 }}>
+    <div className={`custom-node electrical-node digital-timer-node ${isActive && !isBurned ? 'active' : ''}`} style={{ minWidth: 140 }}>
       {/* Power Pins */}
       <Handle type="target" position={Position.Left} id="A1" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
       <Handle type="source" position={Position.Right} id="A2" style={{ top: 25 }} className="port electrical-port" isConnectable={isConnectable} />
@@ -425,12 +426,10 @@ export const TimerNode = ({ data, isConnectable }) => {
       {/* Input Pins */}
       <Handle type="target" position={Position.Left} id="start" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
       <Handle type="target" position={Position.Left} id="reset" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
-      <Handle type="source" position={Position.Left} id="com" style={{ top: 100 }} className="port electrical-port" isConnectable={isConnectable} />
       
       <div style={{ position: 'absolute', left: '-15px', top: '20px', fontSize: '8px', color: 'var(--text-muted)' }}>A1</div>
       <div style={{ position: 'absolute', left: '-25px', top: '45px', fontSize: '8px', color: 'var(--text-muted)' }}>Start</div>
       <div style={{ position: 'absolute', left: '-28px', top: '70px', fontSize: '8px', color: 'var(--text-muted)' }}>Reset</div>
-      <div style={{ position: 'absolute', left: '-23px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>Com</div>
 
       {/* Output Contact Pins */}
       <Handle type="target" position={Position.Right} id="contact_com" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
@@ -443,17 +442,19 @@ export const TimerNode = ({ data, isConnectable }) => {
       <div style={{ position: 'absolute', right: '-18px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>NC</div>
 
       <div className="node-header">
-        <Clock size={14} color={isDone ? '#00ff00' : 'currentColor'} /> {data.label || 'Timer'}
+        <Clock size={14} color={isDone && !isBurned ? '#00ff00' : isBurned ? '#ff0000' : 'currentColor'} /> {data.label || 'Timer'}
       </div>
       <div className="node-body" style={{ flexDirection: 'column', gap: 5, padding: '5px' }}>
-        <div style={{ fontSize: '0.65rem' }}>{subtype.toUpperCase()}</div>
+        <div style={{ fontSize: '0.65rem' }}>{subtype.split('_').join(' ').toUpperCase()}</div>
         <div className="digital-display" style={{ 
-          background: '#000', color: '#0f0', padding: '6px 10px', 
-          fontFamily: 'monospace', borderRadius: 4, textAlign: 'center',
-          boxShadow: 'inset 0 0 5px rgba(0,255,0,0.2)', border: '1px solid #333'
+          background: isBurned ? '#ff000044' : '#111', 
+          color: isBurned ? '#ff0000' : isActive ? '#0ff' : isDone ? '#0f0' : '#444', 
+          padding: '2px 5px', 
+          borderRadius: '3px', 
+          fontFamily: 'monospace',
+          border: `1px solid ${isBurned ? '#ff0000' : isActive ? '#0ff' : isDone ? '#0f0' : '#333'}`
         }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{currentSeconds}s</div>
-          <div style={{ fontSize: '10px', color: '#0a0', marginTop: 2 }}>/ {targetSeconds.toFixed(1)}s</div>
+          {isBurned ? 'BURNED' : `${currentSeconds}s / ${targetSeconds.toFixed(1)}s`}
         </div>
       </div>
     </div>
