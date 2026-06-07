@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Play, Square, Zap, Settings, ArrowRight, Activity, Circle, PackageOpen, Power, Lightbulb, Fan, Droplet, ArrowLeftRight, Cloud, Clock, SlidersHorizontal, ToggleLeft } from 'lucide-react';
+import { Play, Square, Zap, Settings, ArrowRight, Activity, Circle, PackageOpen, Power, Lightbulb, Fan, Droplet, ArrowLeftRight, Cloud, Clock, SlidersHorizontal, ToggleLeft, Menu, X } from 'lucide-react';
 import {
   ReactFlow,
   MiniMap,
@@ -106,9 +106,9 @@ const componentCategories = {
   ]
 };
 
-function Sidebar({ onDragStart }) {
+function Sidebar({ onDragStart, isOpen }) {
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">Component Library</div>
       <div className="components-list-container">
         {Object.entries(componentCategories).map(([category, components]) => (
@@ -144,6 +144,8 @@ function SimulatorApp() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isSimulating, setIsSimulating] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [propertiesNodeId, setPropertiesNodeId] = useState(null);
   const simInterval = useRef(null);
   
   const { screenToFlowPosition } = useReactFlow();
@@ -214,6 +216,13 @@ function SimulatorApp() {
     if (!isSimulating) return;
     // Interaction logic is now handled directly inside the custom components (e.g. SwitchNode) via onPointer events.
   }, [isSimulating]);
+
+  const onNodeContextMenu = useCallback((event, node) => {
+    event.preventDefault();
+    setPropertiesNodeId(node.id);
+  }, []);
+
+  const closeProperties = () => setPropertiesNodeId(null);
 
   const onConnect = useCallback(
     (params) => {
@@ -332,6 +341,9 @@ function SimulatorApp() {
     <div className="app-container">
       <header className="topbar">
         <div className="brand">
+          <button className="btn" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ marginRight: 10, padding: 6, border: 'none', background: 'transparent' }}>
+            <Menu size={20} />
+          </button>
           EKTS<span>•</span><span>Pro</span>
         </div>
         <div className="toolbar">
@@ -356,7 +368,7 @@ function SimulatorApp() {
         </div>
       </header>
       <main className="main-content">
-        <Sidebar onDragStart={onDragStart} />
+        <Sidebar isOpen={isSidebarOpen} onDragStart={onDragStart} />
         <div className="canvas-area">
           <ReactFlow
             nodes={nodes}
@@ -366,6 +378,8 @@ function SimulatorApp() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
+            onNodeContextMenu={onNodeContextMenu}
+            onPaneClick={() => setIsSidebarOpen(false)}
             onEdgeDoubleClick={onEdgeDoubleClick}
             onConnect={onConnect}
             onDrop={onDrop}
@@ -382,33 +396,42 @@ function SimulatorApp() {
             <MiniMap nodeStrokeWidth={3} nodeColor="#1c1e26" maskColor="rgba(0,0,0,0.5)" />
           </ReactFlow>
         </div>
-        <div className="sidebar properties-sidebar" style={{ width: '250px', borderLeft: '1px solid var(--border-color)', padding: '15px', backgroundColor: 'var(--sidebar-bg)' }}>
-        <h2 className="sidebar-title">Properties</h2>
-        {selectedNode ? (
-          <div className="property-form">
-            <div className="form-group" style={{ marginBottom: 15 }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Component ID</label>
-              <input type="text" value={selectedNode.id} disabled style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} />
-            </div>
-            
-            {['relayCoil', 'relayContact', 'switch', 'sensor', 'timer', 'motor', 'lamp'].includes(selectedNode.type) && (
-              <div className="form-group" style={{ marginBottom: 15 }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Label (Tag)</label>
-                <input 
-                  type="text" 
-                  value={selectedNode.data.label || ''} 
-                  onChange={(e) => handleLabelChange(selectedNode.id, e.target.value)}
-                  placeholder="e.g. K1"
-                  style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
-                />
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 5 }}>Components with the same label are physically linked in the simulation.</p>
+        
+        {propertiesNodeId && nodes.find(n => n.id === propertiesNodeId) && (() => {
+          const node = nodes.find(n => n.id === propertiesNodeId);
+          return (
+            <>
+              <div className="properties-overlay" onClick={closeProperties}></div>
+              <div className="properties-panel">
+                <div className="properties-header">
+                  Properties
+                  <button className="close-btn" onClick={closeProperties}><X size={18} /></button>
+                </div>
+                <div className="property-form">
+                  <div className="form-group" style={{ marginBottom: 15 }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Component ID</label>
+                    <input type="text" value={node.id} disabled style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} />
+                  </div>
+                  
+                  {['relayCoil', 'relayContact', 'switch', 'sensor', 'timer', 'motor', 'lamp'].includes(node.type) && (
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Label (Tag)</label>
+                      <input 
+                        type="text" 
+                        value={node.data.label || ''} 
+                        onChange={(e) => handleLabelChange(node.id, e.target.value)}
+                        placeholder="e.g. K1"
+                        style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
+                      />
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 5 }}>Components with the same label are physically linked.</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        ) : (
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Select a component to view properties.</p>
-        )}
-      </div>
+            </>
+          );
+        })()}
+
       </main>
     </div>
   );
