@@ -109,7 +109,7 @@ const componentCategories = {
   ]
 };
 
-function Sidebar({ onDragStart, isOpen }) {
+function Sidebar({ onDragStart, onAdd, isOpen }) {
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">Component Library</div>
@@ -123,6 +123,7 @@ function Sidebar({ onDragStart, isOpen }) {
                   key={idx}
                   className="component-item"
                   onDragStart={(event) => onDragStart(event, comp)}
+                  onClick={() => onAdd(comp)}
                   draggable
                 >
                   <div className={`component-icon ${comp.domain}`}>
@@ -323,10 +324,10 @@ function SimulatorApp() {
         return;
       }
 
-      const position = {
-        x: event.clientX - 280,
-        y: event.clientY - 60,
-      };
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
       const newNode = {
         id: `${compData.type}-${nodes.length + 1}`,
@@ -339,6 +340,26 @@ function SimulatorApp() {
     },
     [nodes, setNodes],
   );
+
+  const onAddComponent = useCallback((compData) => {
+    // Add component to the exact center of the current view
+    const position = screenToFlowPosition({
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+    });
+
+    const newNode = {
+      id: `${compData.type}-${nodes.length + 1}`,
+      type: compData.type,
+      position,
+      data: { label: compData.name, ...compData.config, domain: compData.domain },
+    };
+
+    setNodes((nds) => nds.concat(newNode));
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(false); // Close sidebar automatically on mobile
+    }
+  }, [nodes.length, setNodes]);
 
   return (
     <div className="app-container">
@@ -371,7 +392,7 @@ function SimulatorApp() {
         </div>
       </header>
       <main className="main-content">
-        <Sidebar isOpen={isSidebarOpen} onDragStart={onDragStart} />
+        <Sidebar isOpen={isSidebarOpen} onDragStart={onDragStart} onAdd={onAddComponent} />
         <div className="canvas-area">
           <ReactFlow
             nodes={nodes}
@@ -392,7 +413,10 @@ function SimulatorApp() {
             elementsSelectable={!isSimulating}
             connectionLineType="orthogonal"
             fitView
+            minZoom={0.2}
+            maxZoom={2}
             theme="dark"
+            proOptions={{ hideAttribution: true }}
           >
             <Background color="#5e5e6e" gap={24} size={1} />
             <Controls />
