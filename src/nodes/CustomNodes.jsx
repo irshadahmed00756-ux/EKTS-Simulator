@@ -436,10 +436,12 @@ export const TimerNode = ({ data, isConnectable }) => {
       {/* Input Pins */}
       <Handle type="target" position={Position.Left} id="start" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />
       <Handle type="target" position={Position.Left} id="reset" style={{ top: 75 }} className="port electrical-port" isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Left} id="com" style={{ top: 100 }} className="port electrical-port" isConnectable={isConnectable} />
       
       <div style={{ position: 'absolute', left: '-15px', top: '20px', fontSize: '8px', color: 'var(--text-muted)' }}>A1</div>
       <div style={{ position: 'absolute', left: '-25px', top: '45px', fontSize: '8px', color: 'var(--text-muted)' }}>Start</div>
       <div style={{ position: 'absolute', left: '-28px', top: '70px', fontSize: '8px', color: 'var(--text-muted)' }}>Reset</div>
+      <div style={{ position: 'absolute', left: '-23px', top: '95px', fontSize: '8px', color: 'var(--text-muted)' }}>Com</div>
 
       {/* Output Contact Pins */}
       <Handle type="target" position={Position.Right} id="contact_com" style={{ top: 50 }} className="port electrical-port" isConnectable={isConnectable} />

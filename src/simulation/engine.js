@@ -164,6 +164,7 @@ export function evaluateCircuit(nodes, edges) {
                 (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
                 (!requiredSubtype.includes('v'))) { 
                currentNode.data.isPowered = true;
+               outHandles.push('com');
             } else {
                currentNode.data.burned = true;
             }
@@ -323,7 +324,7 @@ export function evaluateCircuit(nodes, edges) {
           const resetSignal = node.data.resetSignal;
 
           let isTiming = node.data.isTiming || false;
-          const triggerMode = node.data.triggerMode || 'power_on';
+          const triggerMode = node.data.triggerMode || 'signal_on';
 
           if (resetSignal) {
              isTiming = false;
