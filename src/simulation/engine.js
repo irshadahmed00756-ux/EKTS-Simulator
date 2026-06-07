@@ -127,7 +127,6 @@ export function evaluateCircuit(nodes, edges) {
                 (!requiredSubtype.includes('v'))) { // If no voltage specified in subtype, assume it works
                currentNode.data.isPowered = true;
                outHandles.push('com'); // Com provides trigger power
-               outHandles.push('A2');  // Complete circuit to Neutral
             } else {
                currentNode.data.burned = true;
             }
@@ -145,7 +144,6 @@ export function evaluateCircuit(nodes, edges) {
       if (currentNode.type === 'ssr') {
          if (handleIn === 'A1') {
              currentNode.data.isActive = true;
-             outHandles.push('A2');
          }
          if (currentNode.data.isActive && handleIn === 'in') outHandles.push('out');
       }
@@ -162,7 +160,6 @@ export function evaluateCircuit(nodes, edges) {
                 (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
                 (requiredSubtype.includes('ac') && currentVoltage.includes('ac'))) {
                currentNode.data.isActive = true;
-               outHandles.push('A2'); // Complete circuit to Neutral
             } else {
                currentNode.data.burned = true;
             }
