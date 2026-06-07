@@ -557,6 +557,7 @@ function SimulatorApp() {
                           <option value="signal_on">2. Signal ON (Pulse/Short Start)</option>
                         </select>
                       </div>
+                    </>
                   )}
                   
                   {node.type === 'cylinder' && (
