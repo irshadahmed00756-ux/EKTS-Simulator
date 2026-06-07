@@ -236,31 +236,53 @@ export function evaluateCircuit(nodes, edges) {
           const startSignal = node.data.startSignal;
           const resetSignal = node.data.resetSignal;
 
-          // Make the timer active (UI feedback) if startSignal is present
-          node.data.isActive = startSignal;
+          let isTiming = node.data.isTiming || false;
 
           if (resetSignal) {
+             isTiming = false;
              ticks = 0;
              isDone = false;
           } else if (subtype.includes('ton') || subtype.includes('star_delta')) {
              if (isPowered && startSignal) {
+                isTiming = true; // Latch the start signal (pulse trigger)
+             }
+             
+             if (isPowered && isTiming) {
                 if (ticks < targetTicks) ticks++; 
-                if (ticks >= targetTicks) isDone = true;
-             } else {
+                if (ticks >= targetTicks) {
+                   isDone = true;
+                   isTiming = false; // Stop timing once done
+                }
+             } else if (!isPowered) {
+                // Timer resets if main power is lost
+                isTiming = false;
                 ticks = 0;
                 isDone = false;
              }
           } else if (subtype.includes('tof')) {
+             // For OFF-Delay: Output turns ON immediately on startSignal. Starts timing when signal drops.
              if (isPowered && startSignal) {
                 ticks = targetTicks;
                 isDone = true;
-             } else {
+                isTiming = false;
+             } else if (isPowered && !startSignal && isDone) {
+                isTiming = true;
                 if (ticks > 0) ticks--;
-                if (ticks <= 0) isDone = false;
+                if (ticks <= 0) {
+                   isDone = false;
+                   isTiming = false;
+                }
+             } else if (!isPowered) {
+                isTiming = false;
+                ticks = 0;
+                isDone = false;
              }
           }
 
-          return { ...node, data: { ...node.data, ticks, isDone } };
+          // UI feedback
+          node.data.isActive = isTiming || startSignal;
+
+          return { ...node, data: { ...node.data, ticks, isDone, isTiming } };
        }
        return node;
     });
