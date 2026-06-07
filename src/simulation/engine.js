@@ -238,15 +238,30 @@ export function evaluateCircuit(nodes, edges) {
          shortCircuitDetails = "Power connected directly to Ground without Load!";
       }
 
+      // Treat the incoming port as a junction itself (all wires on the same port are shorted together)
+      if (handleIn) {
+         if (!outHandles.includes(handleIn)) outHandles.push(handleIn);
+      }
+
       for (const oh of outHandles) {
-         const outgoingEdges = (edges || []).filter(e => e.source === currentId && e.sourceHandle === oh);
-         for (const edge of outgoingEdges) {
+         // Forward direction edges
+         const outgoingEdgesForward = (edges || []).filter(e => e.source === currentId && e.sourceHandle === oh);
+         for (const edge of outgoingEdgesForward) {
             poweredEdgeIds.add(edge.id);
-            
             if (!edgeVoltages.has(edge.id)) edgeVoltages.set(edge.id, new Set());
             edgeVoltages.get(edge.id).add(currentVoltage);
 
             queue.push({ id: edge.target, voltage: currentVoltage, handleIn: edge.targetHandle });
+         }
+
+         // Backward direction edges (because wires are bidirectional)
+         const outgoingEdgesBackward = (edges || []).filter(e => e.target === currentId && e.targetHandle === oh);
+         for (const edge of outgoingEdgesBackward) {
+            poweredEdgeIds.add(edge.id);
+            if (!edgeVoltages.has(edge.id)) edgeVoltages.set(edge.id, new Set());
+            edgeVoltages.get(edge.id).add(currentVoltage);
+
+            queue.push({ id: edge.source, voltage: currentVoltage, handleIn: edge.sourceHandle });
          }
       }
     }
