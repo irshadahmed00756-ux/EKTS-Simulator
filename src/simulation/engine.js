@@ -243,14 +243,23 @@ export function evaluateCircuit(nodes, edges) {
           const resetSignal = node.data.resetSignal;
 
           let isTiming = node.data.isTiming || false;
+          let triggerMode = node.data.triggerMode || 'signal_on';
 
           if (resetSignal) {
              isTiming = false;
              ticks = 0;
              isDone = false;
           } else if (subtype.includes('ton') || subtype.includes('star_delta')) {
-             if (isPowered && startSignal) {
-                isTiming = true; // Latch the start signal (pulse trigger)
+             if (isPowered) {
+                if (triggerMode === 'power_on') {
+                   // Always start timing when powered, until done
+                   if (!isDone) isTiming = true;
+                } else {
+                   // Signal mode (requires Start pulse)
+                   if (startSignal) {
+                      isTiming = true; // Latch the start signal
+                   }
+                }
              }
              
              if (isPowered && isTiming) {
@@ -266,12 +275,18 @@ export function evaluateCircuit(nodes, edges) {
                 isDone = false;
              }
           } else if (subtype.includes('tof')) {
-             // For OFF-Delay: Output turns ON immediately on startSignal. Starts timing when signal drops.
-             if (isPowered && startSignal) {
+             // For OFF-Delay:
+             // If Power ON mode: Output turns ON when powered. Starts timing when power is LOST (using battery/capacitor) or signal lost.
+             // Wait, standard TOF with Power ON mode usually means it requires continuous power, and triggering is based on the input signal.
+             // Let's just use the startSignal for TOF regardless of mode, since TOF implies a trigger drop.
+             // But if user sets 'power_on', we can treat 'isPowered' as the trigger itself!
+             const effectiveStart = triggerMode === 'power_on' ? true : startSignal;
+             
+             if (isPowered && effectiveStart) {
                 ticks = targetTicks;
                 isDone = true;
                 isTiming = false;
-             } else if (isPowered && !startSignal && isDone) {
+             } else if (isPowered && !effectiveStart && isDone) {
                 isTiming = true;
                 if (ticks > 0) ticks--;
                 if (ticks <= 0) {
@@ -286,7 +301,7 @@ export function evaluateCircuit(nodes, edges) {
           }
 
           // UI feedback
-          node.data.isActive = isTiming || startSignal;
+          node.data.isActive = isTiming || startSignal || (triggerMode === 'power_on' && isPowered && !isDone);
 
           return { ...node, data: { ...node.data, ticks, isDone, isTiming } };
        }
