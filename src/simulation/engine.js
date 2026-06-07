@@ -113,7 +113,10 @@ export function evaluateCircuit(nodes, edges) {
       }
 
       if (currentNode.type === 'timer') {
-         if (handleIn === 'A1') currentNode.data.isPowered = true;
+         if (handleIn === 'A1') {
+            currentNode.data.isPowered = true;
+            outHandles.push('com'); // Com provides trigger power
+         }
          if (handleIn === 'start') currentNode.data.startSignal = true;
          if (handleIn === 'reset') currentNode.data.resetSignal = true;
          
