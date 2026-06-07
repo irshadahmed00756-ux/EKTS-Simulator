@@ -149,7 +149,6 @@ export function evaluateCircuit(nodes, edges) {
                 (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
                 (!requiredSubtype.includes('v'))) { 
                currentNode.data.isPowered = true;
-               outHandles.push('com'); 
             } else {
                currentNode.data.burned = true;
             }
