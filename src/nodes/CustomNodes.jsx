@@ -478,22 +478,15 @@ export const SensorNode = ({ id, data, isConnectable }) => {
   const subtype = data.subtype || 'limit';
   const { setNodes } = useReactFlow();
 
-  const handlePointerDown = (e) => {
+  const handleClick = (e) => {
     e.stopPropagation();
-    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, isTriggered: true } } : n));
-  };
-
-  const handlePointerUp = (e) => {
-    e.stopPropagation();
-    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, isTriggered: false } } : n));
+    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, isTriggered: !n.data.isTriggered } } : n));
   };
 
   return (
     <div 
       className={`custom-node electrical-node ${isTriggered ? 'active' : ''}`}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      onClick={handleClick}
       style={{ cursor: 'pointer', minHeight: 70 }}
     >
       <Handle type="target" position={Position.Left} id="in_no" style={{ top: 20 }} className="port electrical-port" isConnectable={isConnectable} />
