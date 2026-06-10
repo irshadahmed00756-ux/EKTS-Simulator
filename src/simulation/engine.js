@@ -53,7 +53,8 @@ export function evaluateCircuit(nodes, edges) {
              if (cyl.data.limit0Label === node.data.label && ext <= 0) mechanicallyTriggered = true;
              if (cyl.data.limit100Label === node.data.label && ext >= 100) mechanicallyTriggered = true;
           });
-          node.data.isTriggered = mechanicallyTriggered;
+          // Allow manual click override from UI or mechanical trigger
+          node.data.isTriggered = mechanicallyTriggered || node.data.isTriggered;
        }
     });
     // -------------------------------
