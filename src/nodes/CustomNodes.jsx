@@ -299,17 +299,17 @@ export const ValveNode = ({ id, data, isConnectable }) => {
           <Handle type="target" position={Position.Bottom} id="P" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '30%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
           
-          <Handle type="target" position={Position.Bottom} id="T" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <Handle type="source" position={Position.Bottom} id="T" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>T</div>
           
           {/* Solenoids */}
           <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
-          <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
+          <div onClick={(e) => handleManualOverride('A', e)} style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideA ? '#444' : 'transparent', borderRadius: 3 }}>Sol-A</div>
           
           {subtype.includes('4_3') && (
              <>
                <Handle type="target" position={Position.Right} id="solenoid_b" className="port electrical-port" isConnectable={isConnectable} />
-               <div style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-B</div>
+               <div onClick={(e) => handleManualOverride('B', e)} style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideB ? '#444' : 'transparent', borderRadius: 3 }}>Sol-B</div>
              </>
           )}
         </>
@@ -323,22 +323,22 @@ export const ValveNode = ({ id, data, isConnectable }) => {
           <div style={{ position: 'absolute', top: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>B</div>
 
           {/* Bottom ports: R, P, S */}
-          <Handle type="target" position={Position.Bottom} id="R" style={{ left: '20%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <Handle type="source" position={Position.Bottom} id="R" style={{ left: '20%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '20%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>R</div>
           
           <Handle type="target" position={Position.Bottom} id="P" style={{ left: '50%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
           
-          <Handle type="target" position={Position.Bottom} id="S" style={{ left: '80%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <Handle type="source" position={Position.Bottom} id="S" style={{ left: '80%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '80%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>S</div>
 
           <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
-          <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
+          <div onClick={(e) => handleManualOverride('A', e)} style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideA ? '#444' : 'transparent', borderRadius: 3 }}>Sol-A</div>
           
           {subtype === '5_3' && (
              <>
                <Handle type="target" position={Position.Right} id="solenoid_b" className="port electrical-port" isConnectable={isConnectable} />
-               <div style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-B</div>
+               <div onClick={(e) => handleManualOverride('B', e)} style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideB ? '#444' : 'transparent', borderRadius: 3 }}>Sol-B</div>
              </>
           )}
         </>
@@ -352,11 +352,11 @@ export const ValveNode = ({ id, data, isConnectable }) => {
           <Handle type="target" position={Position.Bottom} id="P" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '30%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
           
-          <Handle type="target" position={Position.Bottom} id="R" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <Handle type="source" position={Position.Bottom} id="R" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
           <div style={{ position: 'absolute', bottom: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>R</div>
 
           <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
-          <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
+          <div onClick={(e) => handleManualOverride('A', e)} style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideA ? '#444' : 'transparent', borderRadius: 3 }}>Sol-A</div>
         </>
       )}
 
