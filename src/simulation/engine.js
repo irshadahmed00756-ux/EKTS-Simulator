@@ -400,14 +400,29 @@ export function evaluateCircuit(nodes, edges) {
 
     const fluidSources = newNodes.filter(n => n.type === 'compressor' || n.type === 'pump');
     
+    // Reset gauges and cylinders before traversal
+    newNodes.forEach(n => {
+      if (n.type === 'gauge') n.data.pressure = 0;
+      if (n.type === 'cylinder') {
+         n.data.isExtending = false;
+         n.data.isRetracting = false;
+         n.data.inFlowRate = 0;
+      }
+    });
+
     let fluidQueue = [];
-    fluidSources.forEach(n => fluidQueue.push({ id: n.id, handleIn: 'internal' }));
+    fluidSources.forEach(n => {
+       const p = n.data.maxPressure !== undefined ? n.data.maxPressure : (n.type === 'pump' ? 100 : 10);
+       fluidQueue.push({ id: n.id, handleIn: 'internal', pressure: p, flowRate: 100 });
+    });
     let fluidVisited = new Set();
 
     while (fluidQueue.length > 0) {
       const current = fluidQueue.shift();
       const currentId = current.id;
       const handleIn = current.handleIn;
+      const currentPressure = current.pressure || 0;
+      const currentFlowRate = current.flowRate || 100;
 
       const vKey = `${currentId}-${handleIn}`;
       if (fluidVisited.has(vKey)) continue;
@@ -417,6 +432,8 @@ export function evaluateCircuit(nodes, edges) {
       if (!currentNode) continue;
 
       let outHandles = [];
+      let nextPressure = currentPressure;
+      let nextFlowRate = currentFlowRate;
 
       if (currentNode.type === 'compressor' || currentNode.type === 'pump') {
         outHandles.push('out');
@@ -426,36 +443,62 @@ export function evaluateCircuit(nodes, edges) {
         outHandles.push('out');
       }
 
-      if (currentNode.type === 'valve') {
-        const subtype = currentNode.data.subtype || '5_2';
-        const solA = currentNode.data.solenoidA;
-        const solB = currentNode.data.solenoidB;
-        
-        console.log("Evaluating Valve:", currentId, "Subtype:", subtype, "solA:", solA, "handleIn:", handleIn);
+      if (currentNode.type === 'gauge') {
+        currentNode.data.pressure = currentPressure;
+      }
 
-        if (subtype === '5_2' || subtype === '4_2') {
-          if (solA) outHandles.push('A');
-          else outHandles.push('B'); 
-        } else if (subtype === '4_3_closed' || subtype === '5_3') {
-          if (solA && !solB) outHandles.push('A');
-          else if (solB && !solA) outHandles.push('B');
-        } else if (subtype === '4_3_open') {
-          if (solA && !solB) outHandles.push('A');
-          else if (solB && !solA) outHandles.push('B');
-        } else if (subtype === '4_3_tandem') {
-          if (solA && !solB) outHandles.push('A');
-          else if (solB && !solA) outHandles.push('B');
-        } else if (subtype === '4_3_float') {
-          if (solA && !solB) outHandles.push('A');
-          else if (solB && !solA) outHandles.push('B');
-        } else if (subtype === '3_2') {
-          if (solA) outHandles.push('A');
+      if (currentNode.type === 'throttle') {
+        const openPct = currentNode.data.openPercent !== undefined ? currentNode.data.openPercent : 100;
+        nextFlowRate = currentFlowRate * (openPct / 100);
+        outHandles.push('out');
+      }
+
+      if (currentNode.type === 'propValve') {
+        const setpoint = currentNode.data.setpoint !== undefined ? currentNode.data.setpoint : 0;
+        nextFlowRate = currentFlowRate * (Math.abs(setpoint) / 100);
+        if (handleIn === 'P') {
+           if (setpoint > 0) outHandles.push('A'); // Shift A
+           else if (setpoint < 0) outHandles.push('B'); // Shift B
         }
       }
 
+      if (currentNode.type === 'valve') {
+         // Only pass pressure from P or in
+         if (handleIn === 'P' || handleIn === 'in') {
+            const subtype = currentNode.data.subtype || '5_2';
+            const solA = currentNode.data.solenoidA;
+            const solB = currentNode.data.solenoidB;
+
+            if (subtype === '5_2' || subtype === '4_2') {
+              if (solA) outHandles.push('A');
+              else outHandles.push('B'); 
+            } else if (subtype === '4_3_closed' || subtype === '5_3') {
+              if (solA && !solB) outHandles.push('A');
+              else if (solB && !solA) outHandles.push('B');
+            } else if (subtype === '4_3_open') {
+              if (solA && !solB) outHandles.push('A');
+              else if (solB && !solA) outHandles.push('B');
+            } else if (subtype === '4_3_tandem') {
+              if (solA && !solB) outHandles.push('A');
+              else if (solB && !solA) outHandles.push('B');
+            } else if (subtype === '4_3_float') {
+              if (solA && !solB) outHandles.push('A');
+              else if (solB && !solA) outHandles.push('B');
+            } else if (subtype === '3_2') {
+              if (solA) outHandles.push('A');
+            }
+         }
+      }
+
       if (currentNode.type === 'cylinder') {
-         if (handleIn === 'extend') currentNode.data.isExtending = true;
-         if (handleIn === 'retract') currentNode.data.isRetracting = true;
+         if (handleIn === 'extend' || handleIn === 'A') {
+            currentNode.data.isExtending = true;
+            currentNode.data.inFlowRate = nextFlowRate;
+         }
+         if (handleIn === 'retract' || handleIn === 'B') {
+            currentNode.data.isRetracting = true;
+            currentNode.data.inFlowRate = nextFlowRate;
+         }
       }
       
       if (currentNode.type === 'motorHyd') {
@@ -468,7 +511,7 @@ export function evaluateCircuit(nodes, edges) {
          const outgoingEdges = (edges || []).filter(e => e.source === currentId && e.sourceHandle === oh);
          for (const edge of outgoingEdges) {
             poweredEdgeIds.add(edge.id);
-            fluidQueue.push({ id: edge.target, handleIn: edge.targetHandle });
+            fluidQueue.push({ id: edge.target, handleIn: edge.targetHandle, pressure: nextPressure, flowRate: nextFlowRate });
          }
       }
     }
@@ -485,8 +528,10 @@ export function evaluateCircuit(nodes, edges) {
           isRetracting = true; 
         }
 
-        if (isExtending && !isRetracting && ext < 100) ext += 5;
-        else if (isRetracting && !isExtending && ext > 0) ext -= 5;
+        const speed = ((node.data.inFlowRate !== undefined ? node.data.inFlowRate : 100) / 100) * 5;
+
+        if (isExtending && !isRetracting && ext < 100) ext += speed;
+        else if (isRetracting && !isExtending && ext > 0) ext -= (subtype === 'single_acting' ? 5 : speed); // spring return is fast
         
         ext = Math.max(0, Math.min(100, ext));
         return { ...node, data: { ...node.data, extension: ext } };

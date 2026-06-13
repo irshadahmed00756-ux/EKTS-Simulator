@@ -17,7 +17,8 @@ import { evaluateCircuit } from './simulation/engine';
 import { 
   PowerNode, GroundNode, SwitchNode, RelayCoilNode, RelayContactNode, SSRNode,
   LampNode, MotorNode, ValveNode, CylinderNode, CompressorNode, ExhaustNode, 
-  HydraulicPumpNode, TankNode, TimerNode, SensorNode, JunctionNode
+  HydraulicPumpNode, TankNode, TimerNode, SensorNode, JunctionNode,
+  PressureGaugeNode, FlowControlNode, ProportionalValveNode
 } from './nodes/CustomNodes';
 import OrthogonalEdge from './edges/OrthogonalEdge';
 
@@ -38,7 +39,10 @@ const nodeTypes = {
   pump: HydraulicPumpNode,
   tank: TankNode,
   timer: TimerNode,
-  sensor: SensorNode
+  sensor: SensorNode,
+  gauge: PressureGaugeNode,
+  throttle: FlowControlNode,
+  propValve: ProportionalValveNode
 };
 
 const edgeTypes = {
@@ -98,6 +102,9 @@ const componentCategories = {
     { type: 'cylinder', config: { subtype: 'single_acting' }, name: 'Single Acting Cylinder', domain: 'hydraulic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'double_acting' }, name: 'Double Acting Cylinder', domain: 'hydraulic', icon: ArrowLeftRight },
     { type: 'motorHyd', config: { subtype: 'hyd_motor' }, name: 'Hydraulic Motor', domain: 'hydraulic', icon: Settings },
+    { type: 'gauge', config: { domain: 'hydraulic', pressure: 0 }, name: 'Pressure Gauge', domain: 'hydraulic', icon: Gauge },
+    { type: 'throttle', config: { domain: 'hydraulic', openPercent: 100 }, name: 'Flow Control Valve', domain: 'hydraulic', icon: Sliders },
+    { type: 'propValve', config: { domain: 'hydraulic', setpoint: 0 }, name: 'Proportional Valve', domain: 'hydraulic', icon: Sliders },
   ],
   'Pneumatics': [
     { type: 'compressor', config: { subtype: 'air' }, name: 'Air Compressor', domain: 'pneumatic', icon: Fan },
@@ -107,6 +114,9 @@ const componentCategories = {
     { type: 'valve', config: { subtype: '5_3' }, name: '5/3 Way Valve', domain: 'pneumatic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'single_acting' }, name: 'Single Acting Cylinder', domain: 'pneumatic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'double_acting' }, name: 'Double Acting Cylinder', domain: 'pneumatic', icon: ArrowLeftRight },
+    { type: 'gauge', config: { domain: 'pneumatic', pressure: 0 }, name: 'Pressure Gauge', domain: 'pneumatic', icon: Gauge },
+    { type: 'throttle', config: { domain: 'pneumatic', openPercent: 100 }, name: 'Flow Control Valve', domain: 'pneumatic', icon: Sliders },
+    { type: 'propValve', config: { domain: 'pneumatic', setpoint: 0 }, name: 'Proportional Valve', domain: 'pneumatic', icon: Sliders },
   ]
 };
 
@@ -586,6 +596,50 @@ function SimulatorApp() {
                         />
                       </div>
                     </>
+                  )}
+
+                  {(node.type === 'pump' || node.type === 'compressor') && (
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Max Pressure (bar)</label>
+                      <input 
+                        type="number" 
+                        min="1"
+                        value={node.data.maxPressure !== undefined ? node.data.maxPressure : (node.type === 'pump' ? 100 : 10)} 
+                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, maxPressure: parseFloat(e.target.value) || 0 } } : n))}
+                        style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
+                      />
+                    </div>
+                  )}
+
+                  {node.type === 'throttle' && (
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Valve Opening (%)</label>
+                      <input 
+                        type="range" 
+                        min="0"
+                        max="100"
+                        value={node.data.openPercent !== undefined ? node.data.openPercent : 100} 
+                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, openPercent: parseInt(e.target.value) || 0 } } : n))}
+                        style={{ width: '100%' }} 
+                      />
+                      <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-color)' }}>{node.data.openPercent !== undefined ? node.data.openPercent : 100}%</div>
+                    </div>
+                  )}
+
+                  {node.type === 'propValve' && (
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Manual Flow Override (%)</label>
+                      <input 
+                        type="range" 
+                        min="-100"
+                        max="100"
+                        value={node.data.setpoint !== undefined ? node.data.setpoint : 0} 
+                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, setpoint: parseInt(e.target.value) || 0 } } : n))}
+                        style={{ width: '100%' }} 
+                      />
+                      <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-color)' }}>{node.data.setpoint !== undefined ? node.data.setpoint : 0}%</div>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 5 }}>Negative is Shift B, Positive is Shift A.</p>
+                    </div>
                   )}
                 </div>
               </div>

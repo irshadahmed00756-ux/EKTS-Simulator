@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Zap, Circle, PackageOpen, Lightbulb, Activity, ArrowRight, ArrowLeftRight, Power, Settings, Fan, Droplet, Cloud, Clock } from 'lucide-react';
+import { Zap, Circle, PackageOpen, Lightbulb, Activity, ArrowRight, ArrowLeftRight, Power, Settings, Fan, Droplet, Cloud, Clock, Gauge, Sliders } from 'lucide-react';
 import './nodes.css';
 
 export const JunctionNode = ({ isConnectable }) => {
@@ -291,26 +291,57 @@ export const ValveNode = ({ data, isConnectable }) => {
           <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
           <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
           
-          <Handle type="target" position={Position.Right} id="solenoid_b" className="port electrical-port" isConnectable={isConnectable} />
-          <div style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-B</div>
+          {subtype.includes('4_3') && (
+             <>
+               <Handle type="target" position={Position.Right} id="solenoid_b" className="port electrical-port" isConnectable={isConnectable} />
+               <div style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-B</div>
+             </>
+          )}
+        </>
+      ) : subtype.includes('5_') ? (
+        <>
+          {/* Top ports: A, B */}
+          <Handle type="source" position={Position.Top} id="A" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', top: -18, left: '30%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>A</div>
+          
+          <Handle type="source" position={Position.Top} id="B" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', top: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>B</div>
+
+          {/* Bottom ports: R, P, S */}
+          <Handle type="target" position={Position.Bottom} id="R" style={{ left: '20%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '20%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>R</div>
+          
+          <Handle type="target" position={Position.Bottom} id="P" style={{ left: '50%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
+          
+          <Handle type="target" position={Position.Bottom} id="S" style={{ left: '80%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '80%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>S</div>
+
+          <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
+          
+          {subtype === '5_3' && (
+             <>
+               <Handle type="target" position={Position.Right} id="solenoid_b" className="port electrical-port" isConnectable={isConnectable} />
+               <div style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-B</div>
+             </>
+          )}
         </>
       ) : (
         <>
-          <Handle type="target" position={Position.Left} id="P" className={`port ${portClass}`} isConnectable={isConnectable} />
-          {subtype === '5_2' || subtype === '5_3' ? (
-            <>
-              <Handle type="target" position={Position.Left} id="R" style={{ top: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-              <Handle type="target" position={Position.Left} id="S" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-            </>
-          ) : null}
-          {(subtype === '4_2') ? (
-            <Handle type="target" position={Position.Left} id="T" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-          ) : null}
-          <Handle type="source" position={Position.Right} id="A" style={{ top: 10 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-          {subtype !== '3_2' ? (
-            <Handle type="source" position={Position.Right} id="B" style={{ top: 40 }} className={`port ${portClass}`} isConnectable={isConnectable} />
-          ) : null}
-          <Handle type="target" position={Position.Bottom} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
+          {/* Top port: A */}
+          <Handle type="source" position={Position.Top} id="A" style={{ left: '50%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>A</div>
+
+          {/* Bottom ports: P, T/R */}
+          <Handle type="target" position={Position.Bottom} id="P" style={{ left: '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '30%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
+          
+          <Handle type="target" position={Position.Bottom} id="R" style={{ left: '70%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', bottom: -18, left: '70%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>R</div>
+
+          <Handle type="target" position={Position.Left} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
+          <div style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)' }}>Sol-A</div>
         </>
       )}
 
@@ -502,6 +533,55 @@ export const SensorNode = ({ id, data, isConnectable }) => {
            <div>NO: <span style={{ color: isTriggered ? '#00ff00' : 'inherit' }}>{isTriggered ? 'CLOSE' : 'OPEN'}</span></div>
            <div>NC: <span style={{ color: isTriggered ? 'inherit' : '#00ff00' }}>{isTriggered ? 'OPEN' : 'CLOSE'}</span></div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+export const PressureGaugeNode = ({ data, isConnectable }) => {
+  const pressure = data.pressure || 0;
+  const domain = data.domain || 'hydraulic';
+  const color = domain === 'hydraulic' ? 'var(--color-hydraulic)' : 'var(--color-pneumatic)';
+  return (
+    <div className={`custom-node ${domain}-node`} style={{ borderRadius: '50%', width: 60, height: 60, padding: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', border: `2px solid ${color}` }}>
+      <Handle type="target" position={Position.Bottom} id="in" className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <Gauge size={16} color={color} />
+      <div style={{ fontSize: '10px', marginTop: 2, fontWeight: 'bold' }}>{pressure.toFixed(1)}</div>
+      <div style={{ fontSize: '8px', color: 'var(--text-muted)' }}>bar</div>
+    </div>
+  );
+};
+
+export const FlowControlNode = ({ data, isConnectable }) => {
+  const domain = data.domain || 'hydraulic';
+  const openPercent = data.openPercent !== undefined ? data.openPercent : 100;
+  return (
+    <div className={`custom-node ${domain}-node`}>
+      <Handle type="target" position={Position.Left} id="in" className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out" className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <div className="node-header"><Sliders size={14} /> Throttle</div>
+      <div className="node-body" style={{ flexDirection: 'column' }}>
+        <div style={{ fontSize: '10px' }}>Open: {openPercent}%</div>
+      </div>
+    </div>
+  );
+};
+
+export const ProportionalValveNode = ({ data, isConnectable }) => {
+  const domain = data.domain || 'hydraulic';
+  const setpoint = data.setpoint !== undefined ? data.setpoint : 0; 
+  return (
+    <div className={`custom-node ${domain}-node`}>
+      <Handle type="target" position={Position.Left} id="P" className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <Handle type="target" position={Position.Left} id="T" style={{ top: 40 }} className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="A" style={{ top: 10 }} className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="B" style={{ top: 40 }} className={`port ${domain}-port`} isConnectable={isConnectable} />
+      
+      <Handle type="target" position={Position.Bottom} id="solenoid" className="port electrical-port" isConnectable={isConnectable} />
+      
+      <div className="node-header"><Sliders size={14} /> Prop. Valve</div>
+      <div className="node-body" style={{ flexDirection: 'column' }}>
+        <div style={{ fontSize: '10px' }}>Flow: {setpoint}%</div>
       </div>
     </div>
   );
