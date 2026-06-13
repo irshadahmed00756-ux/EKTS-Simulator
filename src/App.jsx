@@ -632,7 +632,7 @@ export default function App() {
           1inAll simulator
         </h1>
         <h2 style={{ fontSize: '1.2rem', color: '#8b8e98', marginBottom: '50px', fontWeight: '400', textAlign: 'center', textTransform: 'capitalize' }}>
-          electrical hydraulic aur pneumatic
+          Electrical Hydraulic and Pneumatic
         </h2>
         <button 
           onClick={() => setShowSplash(false)}
