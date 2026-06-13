@@ -18,7 +18,7 @@ import {
   PowerNode, GroundNode, SwitchNode, RelayCoilNode, RelayContactNode, SSRNode,
   LampNode, MotorNode, ValveNode, CylinderNode, CompressorNode, ExhaustNode, 
   HydraulicPumpNode, TankNode, TimerNode, SensorNode, JunctionNode,
-  PressureGaugeNode, FlowControlNode, ProportionalValveNode
+  PressureGaugeNode, FlowControlNode, ProportionalValveNode, ManifoldNode
 } from './nodes/CustomNodes';
 import { 
   PressureReliefNode, PressureReducingNode, CheckValveNode, PilotCheckNode,
@@ -34,6 +34,7 @@ const nodeTypes = {
   ssr: SSRNode,
   relayContact: RelayContactNode,
   junction: JunctionNode,
+  manifold: ManifoldNode,
   lamp: LampNode,
   motor: MotorNode,
   valve: ValveNode,
@@ -85,8 +86,8 @@ const componentCategories = {
     { type: 'timer', config: { subtype: 'ton_24v_dc', triggerMode: 'signal_on', label: 'T1', targetSeconds: 5 }, name: 'Timer (Signal Start) 24V DC', domain: 'electrical', icon: Clock },
     { type: 'timer', config: { subtype: 'ton_220v_ac', triggerMode: 'power_on', label: 'T2', targetSeconds: 5 }, name: 'Timer (Direct Start) 220V AC', domain: 'electrical', icon: Clock },
     { type: 'timer', config: { subtype: 'ton_220v_ac', triggerMode: 'signal_on', label: 'T2', targetSeconds: 5 }, name: 'Timer (Signal Start) 220V AC', domain: 'electrical', icon: Clock },
-    { type: 'timer', config: { subtype: 'tof_220v_ac', triggerMode: 'power_on', label: 'T3', targetSeconds: 5 }, name: 'Timer OFF-Delay 220V AC', domain: 'electrical', icon: Clock },
-    { type: 'timer', config: { subtype: 'star_delta_220v_ac', triggerMode: 'power_on', label: 'T4', targetSeconds: 5 }, name: 'Star-Delta Timer 220V AC', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'tof_220v_ac', triggerMode: 'power_on', label: 'T3' }, name: 'Timer OFF-Delay 220V AC', domain: 'electrical', icon: Clock },
+    { type: 'timer', config: { subtype: 'star_delta_220v_ac', triggerMode: 'power_on', label: 'T4' }, name: 'Star-Delta Timer 220V AC', domain: 'electrical', icon: Clock },
   ],
   'Electrical (AC)': [
     { type: 'power', config: { subtype: '220v_ac' }, name: '220V AC Phase', domain: 'electrical', icon: Zap },
@@ -111,7 +112,8 @@ const componentCategories = {
     { type: 'valve', config: { subtype: '4_3_tandem' }, name: '4/3 Valve (Tandem Center)', domain: 'hydraulic', icon: ArrowRight },
     { type: 'valve', config: { subtype: '4_3_float' }, name: '4/3 Valve (Float Center)', domain: 'hydraulic', icon: ArrowRight },
     { type: 'valve', config: { subtype: '4_3_closed' }, name: '01-3C2 Valve (Closed)', domain: 'hydraulic', icon: ArrowRight },
-    { type: 'valve', config: { subtype: '4_3_tandem' }, name: '01-3C4 Valve (Tandem)', domain: 'hydraulic', icon: ArrowRight },
+    { type: 'junction', config: { domain: 'hydraulic' }, name: 'Hose Junction', domain: 'hydraulic', icon: Circle },
+    { type: 'manifold', config: { domain: 'hydraulic' }, name: 'Manifold (1 to 4)', domain: 'hydraulic', icon: PackageOpen },
     { type: 'cylinder', config: { subtype: 'single_acting' }, name: 'Single Acting Cylinder', domain: 'hydraulic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'double_acting' }, name: 'Double Acting Cylinder', domain: 'hydraulic', icon: ArrowLeftRight },
     { type: 'motorHyd', config: { subtype: 'hyd_motor' }, name: 'Hydraulic Motor', domain: 'hydraulic', icon: Settings },
@@ -133,7 +135,8 @@ const componentCategories = {
     { type: 'exhaust', config: { subtype: 'air' }, name: 'Pneumatic Exhaust', domain: 'pneumatic', icon: Cloud },
     { type: 'valve', config: { subtype: '3_2' }, name: '3/2 Way Valve', domain: 'pneumatic', icon: ArrowRight },
     { type: 'valve', config: { subtype: '5_2' }, name: '5/2 Way Valve', domain: 'pneumatic', icon: ArrowRight },
-    { type: 'valve', config: { subtype: '5_3' }, name: '5/3 Way Valve', domain: 'pneumatic', icon: ArrowRight },
+    { type: 'junction', config: { domain: 'pneumatic' }, name: 'Pipe Junction', domain: 'pneumatic', icon: Circle },
+    { type: 'manifold', config: { domain: 'pneumatic' }, name: 'Manifold (1 to 4)', domain: 'pneumatic', icon: PackageOpen },
     { type: 'cylinder', config: { subtype: 'single_acting' }, name: 'Single Acting Cylinder', domain: 'pneumatic', icon: ArrowRight },
     { type: 'cylinder', config: { subtype: 'double_acting' }, name: 'Double Acting Cylinder', domain: 'pneumatic', icon: ArrowLeftRight },
     { type: 'gauge', config: { domain: 'pneumatic', pressure: 0 }, name: 'Pressure Gauge', domain: 'pneumatic', icon: Gauge },

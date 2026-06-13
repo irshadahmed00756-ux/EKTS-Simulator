@@ -450,6 +450,7 @@ export function evaluateCircuit(nodes, edges) {
 
       if (currentNode.type === 'compressor' || currentNode.type === 'pump') outHandles.push('out');
       if (currentNode.type === 'junction') outHandles.push('out');
+      if (currentNode.type === 'manifold') outHandles.push('out1', 'out2', 'out3', 'out4');
       if (currentNode.type === 'gauge') currentNode.data.pressure = currentPressure;
       
       // New logic valves and conditioning
@@ -502,8 +503,8 @@ export function evaluateCircuit(nodes, edges) {
       if (currentNode.type === 'valve') {
          if (handleIn === 'P' || handleIn === 'in') {
             const subtype = currentNode.data.subtype || '5_2';
-            const solA = currentNode.data.solenoidA;
-            const solB = currentNode.data.solenoidB;
+            const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA;
+            const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB;
 
             if (subtype === '5_2' || subtype === '4_2') {
               if (solA) outHandles.push('A'); else outHandles.push('B'); 
@@ -558,6 +559,7 @@ export function evaluateCircuit(nodes, edges) {
            inHandles.push('P'); // In case it's connected backward
        }
        if (currentNode.type === 'junction') inHandles.push('in');
+       if (currentNode.type === 'manifold') inHandles.push('in');
        if (['filter', 'cooler', 'heater', 'throttle', 'flowMeter', 'pressureRelief', 'pressureReducing'].includes(currentNode.type)) {
           if (current.handleOut === 'out' || current.handleOut === 'T' || current.handleOut === 'A') {
               inHandles.push('in', 'P'); 
@@ -568,8 +570,8 @@ export function evaluateCircuit(nodes, edges) {
        }
        if (currentNode.type === 'valve') {
           const subtype = currentNode.data.subtype || '5_2';
-          const solA = currentNode.data.solenoidA;
-          const solB = currentNode.data.solenoidB;
+          const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA;
+          const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB;
           
           if (subtype === '5_2' || subtype === '4_2') {
              if (current.handleOut === 'T' || current.handleOut === 'in') {

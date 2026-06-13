@@ -262,12 +262,27 @@ export const MotorNode = ({ data, isConnectable }) => {
   );
 };
 
-export const ValveNode = ({ data, isConnectable }) => {
+export const ValveNode = ({ id, data, isConnectable }) => {
   const subtype = data.subtype || '5_2';
   const domain = data.domain || 'pneumatic';
   const nodeClass = domain === 'hydraulic' ? 'hydraulic-node' : 'pneumatic-node';
   const portClass = domain === 'hydraulic' ? 'hydraulic-port' : 'pneumatic-port';
   const is4Port = subtype.includes('4_3') || subtype.includes('4_2');
+  const { setNodes } = useReactFlow();
+
+  const handleManualOverride = (solenoid, e) => {
+    e.stopPropagation();
+    setNodes((nds) => nds.map((n) => {
+      if (n.id === id) {
+        if (solenoid === 'A') return { ...n, data: { ...n.data, manualOverrideA: !n.data.manualOverrideA, manualOverrideB: false } };
+        if (solenoid === 'B') return { ...n, data: { ...n.data, manualOverrideB: !n.data.manualOverrideB, manualOverrideA: false } };
+      }
+      return n;
+    }));
+  };
+
+  const isShiftA = data.solenoidA || data.manualOverrideA;
+  const isShiftB = data.solenoidB || data.manualOverrideB;
 
   return (
     <div className={`custom-node ${nodeClass}`} style={{ minWidth: is4Port ? 120 : 100 }}>
@@ -350,12 +365,28 @@ export const ValveNode = ({ data, isConnectable }) => {
       </div>
       <div className="node-body">
         <div className="valve-symbol">
-          {data.solenoidA ? (
+          {isShiftA ? (
             <span style={{ color: 'var(--color-electrical)', fontWeight: 'bold' }}>SHIFT A</span>
-          ) : data.solenoidB ? (
+          ) : isShiftB ? (
             <span style={{ color: 'var(--color-electrical)', fontWeight: 'bold' }}>SHIFT B</span>
           ) : (
             <span>CENTER</span>
+          )}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+          <button 
+             onClick={(e) => handleManualOverride('A', e)}
+             style={{ fontSize: '0.7rem', padding: '2px 5px', cursor: 'pointer', background: data.manualOverrideA ? 'var(--color-electrical)' : 'var(--bg-tertiary)', color: data.manualOverrideA ? '#000' : 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
+          >
+            A
+          </button>
+          {(subtype.includes('_3') || subtype === '4_2') && (
+            <button 
+               onClick={(e) => handleManualOverride('B', e)}
+               style={{ fontSize: '0.7rem', padding: '2px 5px', cursor: 'pointer', background: data.manualOverrideB ? 'var(--color-electrical)' : 'var(--bg-tertiary)', color: data.manualOverrideB ? '#000' : 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
+            >
+              B
+            </button>
           )}
         </div>
       </div>
@@ -582,6 +613,28 @@ export const ProportionalValveNode = ({ data, isConnectable }) => {
       <div className="node-header"><Sliders size={14} /> Prop. Valve</div>
       <div className="node-body" style={{ flexDirection: 'column' }}>
         <div style={{ fontSize: '10px' }}>Flow: {setpoint}%</div>
+      </div>
+    </div>
+  );
+};
+
+export const ManifoldNode = ({ data, isConnectable }) => {
+  const domain = data.domain || 'pneumatic';
+  const nodeClass = domain === 'hydraulic' ? 'hydraulic-node' : 'pneumatic-node';
+  const portClass = domain === 'hydraulic' ? 'hydraulic-port' : 'pneumatic-port';
+  
+  return (
+    <div className={`custom-node ${nodeClass}`} style={{ minWidth: 100, minHeight: 40, borderRadius: 0, padding: 5 }}>
+      <Handle type="target" position={Position.Left} id="in" className={`port ${portClass}`} isConnectable={isConnectable} />
+      
+      <Handle type="source" position={Position.Top} id="out1" style={{ left: '25%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Top} id="out2" style={{ left: '50%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Top} id="out3" style={{ left: '75%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
+      
+      <Handle type="source" position={Position.Right} id="out4" className={`port ${portClass}`} isConnectable={isConnectable} />
+      
+      <div className="node-body" style={{ textAlign: 'center', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', height: 20, lineHeight: '20px', fontSize: '0.7rem' }}>
+        Manifold / Connector
       </div>
     </div>
   );
