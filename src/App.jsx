@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Play, Square, Zap, Settings, ArrowRight, Activity, Circle, PackageOpen, Power, Lightbulb, Fan, Droplet, ArrowLeftRight, Cloud, Clock, SlidersHorizontal, ToggleLeft, Menu, X, Undo2, Download, Upload } from 'lucide-react';
+import { Play, Square, Zap, Settings, ArrowRight, Activity, Circle, PackageOpen, Power, Lightbulb, Fan, Droplet, ArrowLeftRight, Cloud, Clock, SlidersHorizontal, ToggleLeft, Menu, X, Undo2, Download, Upload, Gauge, Sliders } from 'lucide-react';
 import {
   ReactFlow,
   MiniMap,
