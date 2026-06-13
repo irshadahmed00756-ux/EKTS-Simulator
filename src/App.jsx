@@ -436,7 +436,7 @@ function SimulatorApp() {
           <button className="btn" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ marginRight: 10, padding: 6, border: 'none', background: 'transparent' }}>
             <Menu size={20} />
           </button>
-          EKTS<span>•</span><span>Pro</span>
+          1inAll<span>•</span><span>Simulator</span>
         </div>
         <div className="toolbar">
           <button className="btn" onClick={handleUndo} disabled={pastStates.length === 0} title="Undo">
@@ -600,7 +600,7 @@ function SimulatorApp() {
               </div>
               <div className="property-form" style={{ padding: '10px 0', lineHeight: '1.6' }}>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>EKTS<span style={{ color: 'var(--color-electrical)' }}>•</span>Pro</h2>
+                  <h2 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>1inAll<span style={{ color: 'var(--color-electrical)' }}>•</span>Simulator</h2>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Advanced Industrial Simulator</p>
                 </div>
                 
@@ -620,6 +620,34 @@ function SimulatorApp() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  if (showSplash) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        height: '100vh', width: '100vw', backgroundColor: '#1c1e26', color: '#fff', fontFamily: 'Inter, sans-serif'
+      }}>
+        <h1 style={{ fontSize: '4rem', marginBottom: '10px', fontWeight: '800', background: 'linear-gradient(45deg, #00f0ff, #00ff00, #ff0055)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textAlign: 'center' }}>
+          1inAll simulator
+        </h1>
+        <h2 style={{ fontSize: '1.2rem', color: '#8b8e98', marginBottom: '50px', fontWeight: '400', textAlign: 'center', textTransform: 'capitalize' }}>
+          electrical hydraulic aur pneumatic
+        </h2>
+        <button 
+          onClick={() => setShowSplash(false)}
+          style={{
+            padding: '15px 40px', fontSize: '1.2rem', fontWeight: '600', color: '#1c1e26', backgroundColor: '#00f0ff',
+            border: 'none', borderRadius: '30px', cursor: 'pointer',
+            boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)'
+          }}
+        >
+          Open
+        </button>
+      </div>
+    );
+  }
+
   return (
     <ReactFlowProvider>
       <SimulatorApp />
