@@ -424,8 +424,7 @@ export const TimerNode = ({ data, isConnectable }) => {
   const isBurned = data.burned || false;
   const subtype = data.subtype || 'ton';
   const targetSeconds = data.targetSeconds !== undefined ? data.targetSeconds : 2.0;
-  const currentTicks = data.ticks || 0;
-  const currentSeconds = (currentTicks / 20).toFixed(1);
+  const currentSeconds = (data.elapsedSeconds || 0).toFixed(1);
 
   return (
     <div className={`custom-node electrical-node digital-timer-node ${isActive && !isBurned ? 'active' : ''}`} style={{ minWidth: 140 }}>

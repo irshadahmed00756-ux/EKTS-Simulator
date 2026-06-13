@@ -327,57 +327,65 @@ export function evaluateCircuit(nodes, edges) {
           let isTiming = node.data.isTiming || false;
           const triggerMode = node.data.triggerMode || 'signal_on';
 
+          let { isDone, elapsedSeconds = 0, startTime } = node.data;
+
           if (resetSignal) {
              isTiming = false;
-             ticks = 0;
+             elapsedSeconds = 0;
              isDone = false;
-          } else if (subtype.includes('ton') || subtype.includes('star_delta')) {
+          } else if (subtype.includes('ton')) {
+             // For ON-Delay:
              if (isPowered) {
                 if (triggerMode === 'power_on') {
-                   // Always start timing when powered, until done
-                   if (!isDone) isTiming = true;
-                } else {
+                   // Power mode
+                   if (!isTiming && !isDone) {
+                      isTiming = true;
+                      startTime = Date.now();
+                   }
+                } else if (triggerMode === 'signal_on') {
                    // Signal mode (requires Start pulse)
-                   if (startSignal) {
+                   if (startSignal && !isTiming && !isDone) {
                       isTiming = true; // Latch the start signal
+                      startTime = Date.now();
                    }
                 }
              }
              
              if (isPowered && isTiming) {
-                if (ticks < targetTicks) ticks++; 
-                if (ticks >= targetTicks) {
+                elapsedSeconds = (Date.now() - startTime) / 1000;
+                if (elapsedSeconds >= targetSeconds) {
+                   elapsedSeconds = targetSeconds;
                    isDone = true;
                    isTiming = false; // Stop timing once done
                 }
              } else if (!isPowered) {
                 // Timer resets if main power is lost
                 isTiming = false;
-                ticks = 0;
+                elapsedSeconds = 0;
                 isDone = false;
              }
           } else if (subtype.includes('tof')) {
              // For OFF-Delay:
-             // If Power ON mode: Output turns ON when powered. Starts timing when power is LOST (using battery/capacitor) or signal lost.
-             // Wait, standard TOF with Power ON mode usually means it requires continuous power, and triggering is based on the input signal.
-             // Let's just use the startSignal for TOF regardless of mode, since TOF implies a trigger drop.
-             // But if user sets 'power_on', we can treat 'isPowered' as the trigger itself!
              const effectiveStart = triggerMode === 'power_on' ? true : startSignal;
              
              if (isPowered && effectiveStart) {
-                ticks = targetTicks;
+                elapsedSeconds = targetSeconds;
                 isDone = true;
                 isTiming = false;
              } else if (isPowered && !effectiveStart && isDone) {
-                isTiming = true;
-                if (ticks > 0) ticks--;
-                if (ticks <= 0) {
+                if (!isTiming) {
+                   isTiming = true;
+                   startTime = Date.now();
+                }
+                elapsedSeconds = targetSeconds - ((Date.now() - startTime) / 1000);
+                if (elapsedSeconds <= 0) {
+                   elapsedSeconds = 0;
                    isDone = false;
                    isTiming = false;
                 }
              } else if (!isPowered) {
                 isTiming = false;
-                ticks = 0;
+                elapsedSeconds = 0;
                 isDone = false;
              }
           }
@@ -385,7 +393,7 @@ export function evaluateCircuit(nodes, edges) {
           // UI feedback
           node.data.isActive = isTiming || startSignal || (triggerMode === 'power_on' && isPowered && !isDone);
 
-          return { ...node, data: { ...node.data, ticks, isDone, isTiming } };
+          return { ...node, data: { ...node.data, elapsedSeconds, startTime, isDone, isTiming } };
        }
        return node;
     });

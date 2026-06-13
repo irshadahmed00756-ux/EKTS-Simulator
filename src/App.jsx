@@ -492,8 +492,11 @@ function SimulatorApp() {
             connectionLineType="orthogonal"
             connectionMode="loose"
             fitView
-            minZoom={0.2}
-            maxZoom={2}
+            minZoom={0.5}
+            maxZoom={1.5}
+            panOnScroll={false}
+            zoomOnPinch={true}
+            panOnDrag={true}
             theme="dark"
             proOptions={{ hideAttribution: true }}
           >
@@ -626,12 +629,12 @@ export default function App() {
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        height: '100vh', width: '100vw', backgroundColor: '#1c1e26', color: '#fff', fontFamily: 'Inter, sans-serif'
+        height: '100dvh', width: '100vw', backgroundColor: '#1c1e26', color: '#fff', fontFamily: 'Inter, sans-serif'
       }}>
-        <h1 style={{ fontSize: '4rem', marginBottom: '10px', fontWeight: '800', background: 'linear-gradient(45deg, #00f0ff, #00ff00, #ff0055)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textAlign: 'center' }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 8vw, 4rem)', marginBottom: '10px', fontWeight: '800', background: 'linear-gradient(45deg, #00f0ff, #00ff00, #ff0055)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textAlign: 'center' }}>
           1inAll simulator
         </h1>
-        <h2 style={{ fontSize: '1.2rem', color: '#8b8e98', marginBottom: '50px', fontWeight: '400', textAlign: 'center', textTransform: 'capitalize' }}>
+        <h2 style={{ fontSize: 'clamp(0.9rem, 4vw, 1.2rem)', color: '#8b8e98', marginBottom: '50px', fontWeight: '400', textAlign: 'center', textTransform: 'capitalize', padding: '0 20px' }}>
           Electrical Hydraulic and Pneumatic
         </h2>
         <button 
