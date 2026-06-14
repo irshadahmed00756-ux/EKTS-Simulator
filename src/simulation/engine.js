@@ -602,10 +602,17 @@ export function evaluateCircuit(nodes, edges) {
        }
 
        for (const ih of inHandles) {
-          const incomingEdges = getIncomingEdges(current.id, ih);
-          for (const edge of incomingEdges) {
+          const connectedEdges = edges.filter(e => 
+             (e.target === current.id && e.targetHandle === ih) || 
+             (e.source === current.id && e.sourceHandle === ih)
+          );
+          for (const edge of connectedEdges) {
              poweredEdgeIds.add(edge.id); // highlight return lines too!
-             returnQueue.push({ id: edge.source, handleOut: edge.sourceHandle });
+             if (edge.target === current.id) {
+                returnQueue.push({ id: edge.source, handleOut: edge.sourceHandle });
+             } else {
+                returnQueue.push({ id: edge.target, handleOut: edge.targetHandle });
+             }
           }
        }
     }

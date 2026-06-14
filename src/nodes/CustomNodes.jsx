@@ -404,13 +404,25 @@ export const CylinderNode = ({ data, isConnectable }) => {
   return (
     <div className={`custom-node ${nodeClass}`} style={{ minWidth: 120 }}>
       {data.limit0Label && (
-        <div style={{ position: 'absolute', top: -15, left: '10%', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
-          | {data.limit0Label}
+        <div style={{ 
+          position: 'absolute', top: -15, left: '5%', 
+          fontSize: '9px', color: '#fff', background: '#34495e', 
+          padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold',
+          border: '1px solid #2c3e50', boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          zIndex: 10
+        }}>
+          {data.limit0Label}
         </div>
       )}
       {data.limit100Label && (
-        <div style={{ position: 'absolute', top: -15, right: '10%', fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
-          {data.limit100Label} |
+        <div style={{ 
+          position: 'absolute', top: -15, right: '5%', 
+          fontSize: '9px', color: '#fff', background: '#34495e', 
+          padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold',
+          border: '1px solid #2c3e50', boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          zIndex: 10
+        }}>
+          {data.limit100Label}
         </div>
       )}
       <div className="node-header">
@@ -418,8 +430,15 @@ export const CylinderNode = ({ data, isConnectable }) => {
       </div>
       <div className="node-body cylinder-body">
         <div className="cylinder-chamber">
-          <div className="piston" style={{ left: `calc(${extension}% - ${extension / 10}px)` }}></div>
-          <div className="rod" style={{ width: '100%', left: `calc(${extension}% - ${extension / 10}px + 10px)`, transition: 'left 0.3s ease' }}></div>
+          {subtype === 'single_acting' && (
+            <div style={{
+              position: 'absolute', top: '20%', right: '2%', bottom: '20%', left: `calc(${extension}% + 10px)`,
+              background: 'repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(255,255,255,0.4) 4px, rgba(255,255,255,0.4) 6px)',
+              zIndex: 0, transition: 'left 0.3s ease'
+            }}></div>
+          )}
+          <div className="piston" style={{ left: `calc(${extension}% - ${extension / 10}px)`, zIndex: 1 }}></div>
+          <div className="rod" style={{ width: '100%', left: `calc(${extension}% - ${extension / 10}px + 10px)`, transition: 'left 0.3s ease', zIndex: 1 }}></div>
         </div>
       </div>
       <Handle type="target" position={Position.Bottom} id="extend" style={{ left: subtype === 'single_acting' ? '50%' : '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
