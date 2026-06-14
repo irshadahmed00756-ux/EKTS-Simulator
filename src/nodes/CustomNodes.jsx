@@ -456,25 +456,52 @@ export const ExhaustNode = ({ data, isConnectable }) => {
 };
 
 export const HydraulicPumpNode = ({ data, isConnectable }) => {
+  const pressure = data.pressure || 100;
   return (
     <div className="custom-node hydraulic-node">
       <div className="node-header">
         <Activity size={14} /> {data.label || 'Pump'}
       </div>
-      <div className="node-body">
-        <div className="pump-visual">Hyd</div>
+      <div className="node-body" style={{ flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{
+          width: 30, height: 30, borderRadius: '50%',
+          border: '2px dashed var(--color-hydraulic)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          animation: 'spin 2s linear infinite'
+        }}>
+          ⚙️
+        </div>
+        <div style={{ fontSize: '10px', color: 'var(--color-hydraulic)', marginTop: 5, fontWeight: 'bold' }}>
+          {pressure.toFixed(1)} bar
+        </div>
       </div>
+      
       <Handle type="source" position={Position.Top} id="out" className="port hydraulic-port" isConnectable={isConnectable} />
+      <div style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>P</div>
+      
+      <Handle type="target" position={Position.Bottom} id="suction" className="port hydraulic-port" isConnectable={isConnectable} />
+      <div style={{ position: 'absolute', bottom: -15, left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>Suction</div>
     </div>
   );
 };
 
 export const TankNode = ({ data, isConnectable }) => {
   return (
-    <div className="custom-node hydraulic-node">
-      <Handle type="target" position={Position.Top} id="in" className="port hydraulic-port" isConnectable={isConnectable} />
-      <div className="node-header">
-        <Droplet size={14} /> Tank
+    <div className="custom-node hydraulic-node" style={{ minHeight: 70, minWidth: 70, padding: 0 }}>
+      {/* Top Return Port */}
+      <Handle type="target" position={Position.Top} id="in" className="port hydraulic-port" isConnectable={isConnectable} style={{ top: -5 }} />
+      <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>Return</div>
+      
+      {/* Side Suction Port */}
+      <Handle type="source" position={Position.Right} id="suction" className="port hydraulic-port" isConnectable={isConnectable} style={{ top: '70%' }} />
+      <div style={{ position: 'absolute', top: '70%', right: -40, transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--text-secondary)' }}>Suction</div>
+      
+      <div className="node-body" style={{ height: '70px', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', borderRadius: 4, overflow: 'hidden', background: '#1a1a1a', position: 'relative' }}>
+         <div style={{ position: 'absolute', top: 5, left: 0, width: '100%', textAlign: 'center', fontSize: '10px', zIndex: 2 }}>
+           <Droplet size={12} /> Tank
+         </div>
+         {/* Oil visual */}
+         <div style={{ height: '60%', width: '100%', background: 'var(--color-hydraulic)', opacity: 0.8, borderTop: '2px solid rgba(255,255,255,0.3)' }}></div>
       </div>
     </div>
   );
