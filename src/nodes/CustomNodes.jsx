@@ -418,8 +418,8 @@ export const CylinderNode = ({ data, isConnectable }) => {
       </div>
       <div className="node-body cylinder-body">
         <div className="cylinder-chamber">
-          <div className="piston" style={{ left: `${extension}%` }}></div>
-          <div className="rod" style={{ width: `${extension}%`, left: '10%' }}></div>
+          <div className="piston" style={{ left: `calc(${extension}% - ${extension / 10}px)` }}></div>
+          <div className="rod" style={{ width: '100%', left: `calc(${extension}% - ${extension / 10}px + 10px)`, transition: 'left 0.3s ease' }}></div>
         </div>
       </div>
       <Handle type="target" position={Position.Bottom} id="extend" style={{ left: subtype === 'single_acting' ? '50%' : '30%' }} className={`port ${portClass}`} isConnectable={isConnectable} />
