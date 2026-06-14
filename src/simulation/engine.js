@@ -29,6 +29,8 @@ export function evaluateCircuit(nodes, edges) {
       if (node.type === 'valve') {
         defaultData.solenoidA = false;
         defaultData.solenoidB = false;
+        defaultData.solA_electricalActive = false;
+        defaultData.solB_electricalActive = false;
       }
       if (node.type === 'cylinder') {
         defaultData.isExtending = false;
@@ -219,6 +221,27 @@ export function evaluateCircuit(nodes, edges) {
          } else {
             if (handleIn === 'in_nc') outHandles.push('out_nc');
             if (handleIn === 'out_nc') outHandles.push('in_nc');
+         }
+      }
+
+      if (currentNode.type === 'valve') {
+         if (handleIn === 'solA_A1' || handleIn === 'solA_A2' || handleIn === 'solB_A1' || handleIn === 'solB_A2') {
+            const requiredSubtype = String(currentNode.data.coilVoltage || '24v_dc');
+            const reqMatch = requiredSubtype.match(/\d+/);
+            const curMatch = currentVoltage.match(/\d+/);
+            const reqNum = reqMatch ? reqMatch[0] : (requiredSubtype.includes('24v') ? '24' : '220');
+            const curNum = curMatch ? curMatch[0] : null;
+            
+            if ((reqNum && reqNum === curNum) || 
+                (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
+                (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
+                (!requiredSubtype.includes('v'))) {
+               
+               if (handleIn.startsWith('solA')) currentNode.data.solA_electricalActive = true;
+               if (handleIn.startsWith('solB')) currentNode.data.solB_electricalActive = true;
+            } else {
+               currentNode.data.burned = true;
+            }
          }
       }
 
@@ -503,8 +526,8 @@ export function evaluateCircuit(nodes, edges) {
       if (currentNode.type === 'valve') {
          if (handleIn === 'P' || handleIn === 'in') {
             const subtype = currentNode.data.subtype || '5_2';
-            const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA;
-            const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB;
+            const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA || currentNode.data.solA_electricalActive;
+            const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB || currentNode.data.solB_electricalActive;
 
             if (subtype === '5_2' || subtype === '4_2') {
               if (solA) outHandles.push('A'); else outHandles.push('B'); 
@@ -570,8 +593,8 @@ export function evaluateCircuit(nodes, edges) {
        }
        if (currentNode.type === 'valve') {
           const subtype = currentNode.data.subtype || '5_2';
-          const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA;
-          const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB;
+          const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA || currentNode.data.solA_electricalActive;
+          const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB || currentNode.data.solB_electricalActive;
           
           if (subtype === '5_2' || subtype === '4_2') {
              if (current.handleOut === 'T' || current.handleOut === 'in') {

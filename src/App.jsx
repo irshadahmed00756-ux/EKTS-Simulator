@@ -630,6 +630,22 @@ function SimulatorApp() {
                     </>
                   )}
 
+                  {node.type === 'valve' && (
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Coil Voltage Rating</label>
+                      <select 
+                        value={node.data.coilVoltage || '24v_dc'} 
+                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, coilVoltage: e.target.value } } : n))}
+                        style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
+                      >
+                        <option value="24v_dc">24V DC</option>
+                        <option value="110v_ac">110V AC</option>
+                        <option value="220v_ac">220V AC</option>
+                      </select>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 5 }}>Used when connecting electrical supply directly to valve coils (A1/A2).</p>
+                    </div>
+                  )}
+
                   {(node.type === 'pump' || node.type === 'compressor') && (
                     <div className="form-group" style={{ marginBottom: 15 }}>
                       <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Max Pressure (bar)</label>
