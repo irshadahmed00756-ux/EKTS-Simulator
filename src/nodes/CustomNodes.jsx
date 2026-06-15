@@ -607,7 +607,7 @@ export const SensorNode = ({ id, data, isConnectable }) => {
 
   const handleClick = (e) => {
     e.stopPropagation();
-    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, isTriggered: !n.data.isTriggered } } : n));
+    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, manualTrigger: !n.data.manualTrigger } } : n));
   };
 
   return (

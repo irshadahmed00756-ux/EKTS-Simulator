@@ -64,8 +64,9 @@ export function evaluateCircuit(nodes, edges) {
                 }
              });
           });
-          // Allow manual click override from UI or mechanical trigger
-          node.data.isTriggered = mechanicallyTriggered || node.data.isTriggered;
+          // Decouple mechanical and manual triggers so it doesn't get stuck
+          node.data.mechanicallyTriggered = mechanicallyTriggered;
+          node.data.isTriggered = mechanicallyTriggered || node.data.manualTrigger;
        }
     });
     // -------------------------------
