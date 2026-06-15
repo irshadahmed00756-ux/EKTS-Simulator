@@ -165,15 +165,20 @@ export function evaluateCircuit(nodes, edges) {
 
       if (currentNode.type === 'timer') {
          if (handleIn === 'A1' || handleIn === 'A2') {
-            const requiredSubtype = String(currentNode.data.subtype || '24v_dc');
+            const requiredSubtype = String(currentNode.data.subtype || '24v_dc').toLowerCase();
+            const currentV = String(currentVoltage).toLowerCase();
             const reqMatch = requiredSubtype.match(/\d+/);
-            const curMatch = currentVoltage.match(/\d+/);
+            const curMatch = currentV.match(/\d+/);
             const reqNum = reqMatch ? reqMatch[0] : (requiredSubtype.includes('24v') ? '24' : '220');
             const curNum = curMatch ? curMatch[0] : null;
             
+            const isPhaseLine = currentV === 'l1' || currentV === 'l2' || currentV === 'l3';
+            const acceptsAC = requiredSubtype.includes('ac');
+            
             if ((reqNum && reqNum === curNum) || 
-                (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
-                (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
+                (requiredSubtype.includes('dc') && currentV.includes('dc')) ||
+                (acceptsAC && currentV.includes('ac')) ||
+                (acceptsAC && isPhaseLine) || 
                 (!requiredSubtype.includes('v'))) { 
                currentNode.data.isPowered = true;
                outHandles.push('com');
@@ -206,15 +211,20 @@ export function evaluateCircuit(nodes, edges) {
 
       if (currentNode.type === 'relayCoil') {
          if (handleIn === 'A1' || handleIn === 'A2') {
-            const requiredSubtype = String(currentNode.data.subtype || 'coil_24v');
+            const requiredSubtype = String(currentNode.data.subtype || 'coil_24v').toLowerCase();
+            const currentV = String(currentVoltage).toLowerCase();
             const reqMatch = requiredSubtype.match(/\d+/);
-            const curMatch = currentVoltage.match(/\d+/);
+            const curMatch = currentV.match(/\d+/);
             const reqNum = reqMatch ? reqMatch[0] : null;
             const curNum = curMatch ? curMatch[0] : null;
             
+            const isPhaseLine = currentV === 'l1' || currentV === 'l2' || currentV === 'l3';
+            const acceptsAC = requiredSubtype.includes('ac');
+            
             if ((reqNum && reqNum === curNum) || 
-                (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
-                (requiredSubtype.includes('ac') && currentVoltage.includes('ac'))) {
+                (requiredSubtype.includes('dc') && currentV.includes('dc')) ||
+                (acceptsAC && currentV.includes('ac')) ||
+                (acceptsAC && isPhaseLine)) {
                currentNode.data.isActive = true;
             } else {
                currentNode.data.burned = true;
@@ -235,15 +245,20 @@ export function evaluateCircuit(nodes, edges) {
 
       if (currentNode.type === 'valve') {
          if (handleIn === 'solA_A1' || handleIn === 'solA_A2' || handleIn === 'solB_A1' || handleIn === 'solB_A2') {
-            const requiredSubtype = String(currentNode.data.coilVoltage || '24v_dc');
+            const requiredSubtype = String(currentNode.data.coilVoltage || '24v_dc').toLowerCase();
+            const currentV = String(currentVoltage).toLowerCase();
             const reqMatch = requiredSubtype.match(/\d+/);
-            const curMatch = currentVoltage.match(/\d+/);
+            const curMatch = currentV.match(/\d+/);
             const reqNum = reqMatch ? reqMatch[0] : (requiredSubtype.includes('24v') ? '24' : '220');
             const curNum = curMatch ? curMatch[0] : null;
             
+            const isPhaseLine = currentV === 'l1' || currentV === 'l2' || currentV === 'l3';
+            const acceptsAC = requiredSubtype.includes('ac');
+            
             if ((reqNum && reqNum === curNum) || 
-                (requiredSubtype.includes('dc') && currentVoltage.includes('dc')) ||
-                (requiredSubtype.includes('ac') && currentVoltage.includes('ac')) || 
+                (requiredSubtype.includes('dc') && currentV.includes('dc')) ||
+                (acceptsAC && currentV.includes('ac')) || 
+                (acceptsAC && isPhaseLine) || 
                 (!requiredSubtype.includes('v'))) {
                
                if (handleIn.startsWith('solA')) currentNode.data.solA_electricalActive = true;

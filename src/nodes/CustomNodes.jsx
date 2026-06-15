@@ -281,8 +281,8 @@ export const ValveNode = ({ id, data, isConnectable }) => {
     }));
   };
 
-  const isShiftA = data.solenoidA || data.manualOverrideA;
-  const isShiftB = data.solenoidB || data.manualOverrideB;
+  const isShiftA = data.solenoidA || data.manualOverrideA || data.solA_electricalActive;
+  const isShiftB = data.solenoidB || data.manualOverrideB || data.solB_electricalActive;
 
   return (
     <div className={`custom-node ${nodeClass}`} style={{ minWidth: is4Port ? 120 : 100 }}>
