@@ -569,8 +569,23 @@ export function evaluateCircuit(nodes, edges) {
             const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA || currentNode.data.solA_electricalActive;
             const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB || currentNode.data.solB_electricalActive;
 
-            if (subtype === '5_2' || subtype === '4_2') {
-              if (solA) outHandles.push('A'); else outHandles.push('B'); 
+            if (subtype === '5_2' || subtype === '4_2' || subtype === '5_2_spring' || subtype === '4_2_spring') {
+              const isSpring = subtype.includes('spring');
+              if (solA) {
+                  currentNode.data.lastPosition = 'A';
+                  outHandles.push('A');
+              } else if (solB && !isSpring) {
+                  currentNode.data.lastPosition = 'B';
+                  outHandles.push('B');
+              } else {
+                  if (isSpring) {
+                      currentNode.data.lastPosition = 'B';
+                      outHandles.push('B');
+                  } else {
+                      const lastPos = currentNode.data.lastPosition || 'B';
+                      outHandles.push(lastPos);
+                  }
+              }
             } else if (subtype.includes('4_3') || subtype === '5_3') {
               if (solA && !solB) outHandles.push('A');
               else if (solB && !solA) outHandles.push('B');
@@ -638,15 +653,16 @@ export function evaluateCircuit(nodes, edges) {
           const solA = currentNode.data.solenoidA || currentNode.data.manualOverrideA || currentNode.data.solA_electricalActive;
           const solB = currentNode.data.solenoidB || currentNode.data.manualOverrideB || currentNode.data.solB_electricalActive;
           
-          if (subtype === '5_2' || subtype === '4_2') {
+          if (subtype === '5_2' || subtype === '4_2' || subtype === '5_2_spring' || subtype === '4_2_spring') {
+             const lastPos = currentNode.data.lastPosition || 'B';
              if (current.handleOut === 'T' || current.handleOut === 'in') {
-                if (solA) inHandles.push('B'); else inHandles.push('A');
+                if (lastPos === 'A') inHandles.push('B'); else inHandles.push('A');
              }
              if (current.handleOut === 'Ex') {
-                if (solA) inHandles.push('B');
+                if (lastPos === 'A') inHandles.push('B');
              }
              if (current.handleOut === 'Eb') {
-                if (!solA) inHandles.push('A');
+                if (lastPos === 'B') inHandles.push('A');
              }
           } else if (subtype.includes('4_3') || subtype === '5_3') {
              if (current.handleOut === 'T' || current.handleOut === 'in') {

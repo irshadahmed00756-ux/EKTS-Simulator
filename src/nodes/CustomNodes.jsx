@@ -309,7 +309,7 @@ export const ValveNode = ({ id, data, isConnectable }) => {
           <div style={{ position: 'absolute', left: '-10px', top: '55%', fontSize: '7px', color: 'var(--text-muted)' }}>A2</div>
           <div onClick={(e) => handleManualOverride('A', e)} style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideA ? '#444' : 'transparent', borderRadius: 3 }}>Sol-A</div>
           
-          {subtype.includes('4_3') && (
+          {(subtype.includes('4_3') || subtype === '4_2') && (
              <>
                <Handle type="target" position={Position.Right} id="solB_A1" style={{ top: '40%' }} className="port electrical-port" isConnectable={isConnectable} />
                <div style={{ position: 'absolute', right: '-10px', top: '35%', fontSize: '7px', color: 'var(--text-muted)' }}>A1</div>
@@ -344,7 +344,7 @@ export const ValveNode = ({ id, data, isConnectable }) => {
           <div style={{ position: 'absolute', left: '-10px', top: '55%', fontSize: '7px', color: 'var(--text-muted)' }}>A2</div>
           <div onClick={(e) => handleManualOverride('A', e)} style={{ position: 'absolute', left: 5, top: '50%', transform: 'translateY(-50%)', fontSize: '10px', color: 'var(--color-electrical)', cursor: 'pointer', padding: 2, background: data.manualOverrideA ? '#444' : 'transparent', borderRadius: 3 }}>Sol-A</div>
           
-          {subtype === '5_3' && (
+          {(subtype === '5_3' || subtype === '5_2') && (
              <>
                <Handle type="target" position={Position.Right} id="solB_A1" style={{ top: '40%' }} className="port electrical-port" isConnectable={isConnectable} />
                <div style={{ position: 'absolute', right: '-10px', top: '35%', fontSize: '7px', color: 'var(--text-muted)' }}>A1</div>
@@ -395,9 +395,9 @@ export const ValveNode = ({ id, data, isConnectable }) => {
           >
             A
           </button>
-          {(subtype.includes('_3') || subtype === '4_2') && (
-            <button 
-               onClick={(e) => handleManualOverride('B', e)}
+          {(subtype.includes('_3') || subtype === '4_2' || subtype === '5_2') && (
+             <button 
+                onClick={(e) => handleManualOverride('B', e)}
                style={{ fontSize: '0.7rem', padding: '2px 5px', cursor: 'pointer', background: data.manualOverrideB ? 'var(--color-electrical)' : 'var(--bg-tertiary)', color: data.manualOverrideB ? '#000' : 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
             >
               B
