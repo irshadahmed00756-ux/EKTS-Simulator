@@ -22,7 +22,8 @@ import {
 } from './nodes/CustomNodes';
 import { 
   PressureReliefNode, PressureReducingNode, CheckValveNode, PilotCheckNode,
-  ShuttleValveNode, FlowMeterNode, FilterNode, CoolerNode, HeaterNode
+  ShuttleValveNode, FlowMeterNode, FilterNode, CoolerNode, HeaterNode,
+  OneWayThrottleNode
 } from './nodes/AdvancedNodes';
 import OrthogonalEdge from './edges/OrthogonalEdge';
 
@@ -56,7 +57,8 @@ const nodeTypes = {
   flowMeter: FlowMeterNode,
   filter: FilterNode,
   cooler: CoolerNode,
-  heater: HeaterNode
+  heater: HeaterNode,
+  oneWayThrottle: OneWayThrottleNode,
 };
 
 const edgeTypes = {
@@ -120,10 +122,11 @@ const componentCategories = {
     { type: 'gauge', config: { domain: 'hydraulic', pressure: 0 }, name: 'Pressure Gauge', domain: 'hydraulic', icon: Gauge },
     { type: 'flowMeter', config: { domain: 'hydraulic' }, name: 'Flow Meter', domain: 'hydraulic', icon: Activity },
     { type: 'throttle', config: { domain: 'hydraulic', openPercent: 100 }, name: 'Flow Control Valve', domain: 'hydraulic', icon: Sliders },
+    { type: 'oneWayThrottle', config: { domain: 'hydraulic', openPercent: 100 }, name: '1-Way Flow Control', domain: 'hydraulic', icon: Sliders },
     { type: 'propValve', config: { domain: 'hydraulic', setpoint: 0 }, name: 'Proportional Valve', domain: 'hydraulic', icon: Sliders },
     { type: 'pressureRelief', config: { domain: 'hydraulic', crackPressure: 100 }, name: 'Relief Valve', domain: 'hydraulic', icon: ShieldAlert },
     { type: 'pressureReducing', config: { domain: 'hydraulic', setPressure: 50 }, name: 'Pressure Reducing Valve', domain: 'hydraulic', icon: ArrowDownUp },
-    { type: 'checkValve', config: { domain: 'hydraulic' }, name: 'Check Valve', domain: 'hydraulic', icon: ArrowUp },
+    { type: 'checkValve', config: { domain: 'hydraulic' }, name: 'One-Way Valve (Check)', domain: 'hydraulic', icon: ArrowUp },
     { type: 'pilotCheck', config: { domain: 'hydraulic' }, name: 'Pilot Check Valve', domain: 'hydraulic', icon: ArrowUp },
     { type: 'shuttleValve', config: { domain: 'hydraulic' }, name: 'Shuttle Valve (OR)', domain: 'hydraulic', icon: Waypoints },
     { type: 'filter', config: { domain: 'hydraulic' }, name: 'Oil Filter', domain: 'hydraulic', icon: FilterIcon },
@@ -142,10 +145,11 @@ const componentCategories = {
     { type: 'gauge', config: { domain: 'pneumatic', pressure: 0 }, name: 'Pressure Gauge', domain: 'pneumatic', icon: Gauge },
     { type: 'flowMeter', config: { domain: 'pneumatic' }, name: 'Flow Meter', domain: 'pneumatic', icon: Activity },
     { type: 'throttle', config: { domain: 'pneumatic', openPercent: 100 }, name: 'Flow Control Valve', domain: 'pneumatic', icon: Sliders },
+    { type: 'oneWayThrottle', config: { domain: 'pneumatic', openPercent: 100 }, name: '1-Way Flow Control', domain: 'pneumatic', icon: Sliders },
     { type: 'propValve', config: { domain: 'pneumatic', setpoint: 0 }, name: 'Proportional Valve', domain: 'pneumatic', icon: Sliders },
     { type: 'pressureRelief', config: { domain: 'pneumatic', crackPressure: 5 }, name: 'Relief Valve', domain: 'pneumatic', icon: ShieldAlert },
     { type: 'pressureReducing', config: { domain: 'pneumatic', setPressure: 4 }, name: 'Pressure Regulator', domain: 'pneumatic', icon: ArrowDownUp },
-    { type: 'checkValve', config: { domain: 'pneumatic' }, name: 'Check Valve', domain: 'pneumatic', icon: ArrowUp },
+    { type: 'checkValve', config: { domain: 'pneumatic' }, name: 'One-Way Valve (Check)', domain: 'pneumatic', icon: ArrowUp },
     { type: 'pilotCheck', config: { domain: 'pneumatic' }, name: 'Pilot Check Valve', domain: 'pneumatic', icon: ArrowUp },
     { type: 'shuttleValve', config: { domain: 'pneumatic' }, name: 'Shuttle Valve (OR)', domain: 'pneumatic', icon: Waypoints },
     { type: 'filter', config: { domain: 'pneumatic' }, name: 'Air Filter', domain: 'pneumatic', icon: FilterIcon },
@@ -691,16 +695,15 @@ function SimulatorApp() {
                     </div>
                   )}
 
-                  {node.type === 'throttle' && (
+                  {(node.type === 'throttle' || node.type === 'oneWayThrottle') && (
                     <div className="form-group" style={{ marginBottom: 15 }}>
-                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Valve Opening (%)</label>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Open Percentage (%)</label>
                       <input 
                         type="range" 
-                        min="0"
-                        max="100"
+                        min="0" max="100" 
                         value={node.data.openPercent !== undefined ? node.data.openPercent : 100} 
-                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, openPercent: parseInt(e.target.value) || 0 } } : n))}
-                        style={{ width: '100%' }} 
+                        onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, openPercent: parseInt(e.target.value) } } : n))}
+                        style={{ width: '100%' }}
                       />
                       <div style={{ textAlign: 'right', fontSize: '0.8rem', color: 'var(--text-color)' }}>{node.data.openPercent !== undefined ? node.data.openPercent : 100}%</div>
                     </div>

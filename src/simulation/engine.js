@@ -513,6 +513,21 @@ export function evaluateCircuit(nodes, edges) {
       if (currentNode.type === 'checkValve') {
          if (handleIn === 'in') outHandles.push('out'); // only allows forward flow
       }
+      if (currentNode.type === 'oneWayThrottle') {
+         // Forward flow: restricted by throttle
+         // Reverse flow: free flow through check valve (handled in backwards pass implicitly by pushing in, or here by pushing if backwards)
+         // Wait, oneWayThrottle needs to handle both directions in forward/backward?
+         // Forward pressure:
+         if (handleIn === 'in') {
+             outHandles.push('out');
+             const openPct = currentNode.data.openPercent !== undefined ? currentNode.data.openPercent : 100;
+             nextFlowRate = (currentFlowRate * openPct) / 100;
+             nextPressure = currentPressure - ((100 - openPct) / 100) * 10;
+         } else if (handleIn === 'out') {
+             outHandles.push('in');
+             // Free flow in reverse
+         }
+      }
       if (currentNode.type === 'pilotCheck') {
          // check if pilot is pressurized
          const pilotPressurized = pressurizedPorts.get(currentId)['X'];
@@ -608,9 +623,11 @@ export function evaluateCircuit(nodes, edges) {
        }
        if (currentNode.type === 'junction') inHandles.push('in');
        if (currentNode.type === 'manifold') inHandles.push('in');
-       if (['filter', 'cooler', 'heater', 'throttle', 'flowMeter', 'pressureRelief', 'pressureReducing'].includes(currentNode.type)) {
+       if (['filter', 'cooler', 'heater', 'throttle', 'flowMeter', 'pressureRelief', 'pressureReducing', 'oneWayThrottle'].includes(currentNode.type)) {
           if (current.handleOut === 'out' || current.handleOut === 'T' || current.handleOut === 'A') {
               inHandles.push('in', 'P'); 
+          } else if (current.handleOut === 'in' && currentNode.type === 'oneWayThrottle') {
+              inHandles.push('out'); // reverse flow allowed freely
           }
        }
        if (currentNode.type === 'checkValve') {

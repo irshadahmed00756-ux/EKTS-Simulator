@@ -63,6 +63,23 @@ export const PilotCheckNode = ({ data, isConnectable }) => {
   );
 };
 
+export const OneWayThrottleNode = ({ data, isConnectable }) => {
+  const domain = data.domain || 'hydraulic';
+  const color = domain === 'hydraulic' ? 'var(--color-hydraulic)' : 'var(--color-pneumatic)';
+  const openPercent = data.openPercent !== undefined ? data.openPercent : 100;
+  return (
+    <div className={`custom-node ${domain}-node`} style={{ border: `1px solid ${color}`, padding: 5, borderRadius: 4, width: 80, textAlign: 'center' }}>
+      <Handle type="target" position={Position.Left} id="in" className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <Handle type="source" position={Position.Right} id="out" className={`port ${domain}-port`} isConnectable={isConnectable} />
+      <div style={{fontSize: '9px', marginBottom: 2}}>1-Way Flow</div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
+        <ArrowUp size={12} color={color} style={{ transform: 'rotate(90deg)' }} />
+        <div style={{fontSize: '9px', fontWeight: 'bold'}}>{openPercent}%</div>
+      </div>
+    </div>
+  );
+};
+
 export const ShuttleValveNode = ({ data, isConnectable }) => {
   const domain = data.domain || 'hydraulic';
   const color = domain === 'hydraulic' ? 'var(--color-hydraulic)' : 'var(--color-pneumatic)';
