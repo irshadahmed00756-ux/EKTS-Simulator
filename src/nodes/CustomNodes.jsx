@@ -416,30 +416,35 @@ export const CylinderNode = ({ data, isConnectable }) => {
   const nodeClass = domain === 'hydraulic' ? 'hydraulic-node' : 'pneumatic-node';
   const portClass = domain === 'hydraulic' ? 'hydraulic-port' : 'pneumatic-port';
 
+  const limitSwitches = data.limitSwitches || [];
+  
+  // Combine legacy and new limits for rendering
+  const allLimits = [...limitSwitches];
+  if (data.limit0Label && !allLimits.find(l => l.label === data.limit0Label && l.position === 0)) {
+     allLimits.push({ label: data.limit0Label, position: 0 });
+  }
+  if (data.limit100Label && !allLimits.find(l => l.label === data.limit100Label && l.position === 100)) {
+     allLimits.push({ label: data.limit100Label, position: 100 });
+  }
+
   return (
     <div className={`custom-node ${nodeClass}`} style={{ minWidth: 120 }}>
-      {data.limit0Label && (
-        <div style={{ 
-          position: 'absolute', top: -15, left: '5%', 
-          fontSize: '9px', color: '#fff', background: '#34495e', 
-          padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold',
-          border: '1px solid #2c3e50', boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          zIndex: 10
-        }}>
-          {data.limit0Label}
-        </div>
-      )}
-      {data.limit100Label && (
-        <div style={{ 
-          position: 'absolute', top: -15, right: '5%', 
-          fontSize: '9px', color: '#fff', background: '#34495e', 
-          padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold',
-          border: '1px solid #2c3e50', boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          zIndex: 10
-        }}>
-          {data.limit100Label}
-        </div>
-      )}
+      {allLimits.map((limit, idx) => {
+        // Map 0-100 to 5%-95% width to align with the cylinder chamber limits
+        const leftPos = 5 + (limit.position * 0.9);
+        return (
+          <div key={idx} style={{ 
+            position: 'absolute', top: -15, left: `calc(${leftPos}% - 15px)`, 
+            fontSize: '9px', color: '#fff', background: '#34495e', 
+            padding: '2px 8px', borderRadius: '10px', fontWeight: 'bold',
+            border: '1px solid #2c3e50', boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            zIndex: 10, textAlign: 'center', minWidth: '30px'
+          }}>
+            {limit.label}
+          </div>
+        );
+      })}
+      
       <div className="node-header">
         <ArrowLeftRight size={14} /> {data.label || 'Cylinder'}
       </div>

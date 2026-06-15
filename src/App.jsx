@@ -606,28 +606,60 @@ function SimulatorApp() {
                   )}
                   
                   {node.type === 'cylinder' && (
-                    <>
-                      <div className="form-group" style={{ marginBottom: 15 }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Limit Switch at 0% (Retracted)</label>
-                        <input 
-                          type="text" 
-                          value={node.data.limit0Label || ''} 
-                          onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limit0Label: e.target.value } } : n))}
-                          placeholder="e.g. LS1"
-                          style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
-                        />
-                      </div>
-                      <div className="form-group" style={{ marginBottom: 15 }}>
-                        <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Limit Switch at 100% (Extended)</label>
-                        <input 
-                          type="text" 
-                          value={node.data.limit100Label || ''} 
-                          onChange={(e) => setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limit100Label: e.target.value } } : n))}
-                          placeholder="e.g. LS2"
-                          style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }} 
-                        />
-                      </div>
-                    </>
+                    <div className="form-group" style={{ marginBottom: 15 }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 5 }}>Limit Switches</label>
+                      {(node.data.limitSwitches || []).map((limit, idx) => (
+                        <div key={idx} style={{ display: 'flex', gap: '5px', marginBottom: '8px', alignItems: 'center' }}>
+                          <input 
+                            type="text" 
+                            value={limit.label} 
+                            onChange={(e) => {
+                               const newLimits = [...(node.data.limitSwitches || [])];
+                               newLimits[idx].label = e.target.value;
+                               setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limitSwitches: newLimits } } : n));
+                            }}
+                            placeholder="Label (e.g. LS1)"
+                            style={{ flex: 1, padding: '6px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
+                          />
+                          <input 
+                            type="number" 
+                            min="0" max="100"
+                            value={limit.position} 
+                            onChange={(e) => {
+                               const newLimits = [...(node.data.limitSwitches || [])];
+                               newLimits[idx].position = parseInt(e.target.value) || 0;
+                               setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limitSwitches: newLimits } } : n));
+                            }}
+                            title="Position %"
+                            style={{ width: '60px', padding: '6px', backgroundColor: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: 4 }}
+                          />
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>%</span>
+                          <button 
+                            onClick={() => {
+                               const newLimits = (node.data.limitSwitches || []).filter((_, i) => i !== idx);
+                               setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limitSwitches: newLimits } } : n));
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', padding: '4px' }}
+                            title="Remove Limit"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <button 
+                        onClick={() => {
+                           const newLimits = [...(node.data.limitSwitches || [])];
+                           newLimits.push({ label: `LS${newLimits.length + 1}`, position: 50 });
+                           setNodes(nds => nds.map(n => n.id === node.id ? { ...n, data: { ...n.data, limitSwitches: newLimits } } : n));
+                        }}
+                        style={{ width: '100%', padding: '6px', marginTop: '5px', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-color)', border: '1px dashed var(--border-color)', borderRadius: 4, cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        + Add Limit Switch
+                      </button>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 8 }}>
+                        Note: For older circuits using legacy limits (0% / 100%), please recreate them using the 'Add Limit Switch' button to edit them.
+                      </p>
+                    </div>
                   )}
 
                   {node.type === 'valve' && (

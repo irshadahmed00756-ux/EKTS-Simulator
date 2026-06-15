@@ -52,8 +52,17 @@ export function evaluateCircuit(nodes, edges) {
           let mechanicallyTriggered = false;
           cylinders.forEach(cyl => {
              const ext = cyl.data.extension || 0;
-             if (cyl.data.limit0Label === node.data.label && ext <= 0) mechanicallyTriggered = true;
-             if (cyl.data.limit100Label === node.data.label && ext >= 100) mechanicallyTriggered = true;
+             // Legacy
+             if (cyl.data.limit0Label === node.data.label && ext <= 2) mechanicallyTriggered = true;
+             if (cyl.data.limit100Label === node.data.label && ext >= 98) mechanicallyTriggered = true;
+             
+             // Dynamic limit switches
+             const limitSwitches = cyl.data.limitSwitches || [];
+             limitSwitches.forEach(limit => {
+                if (limit.label === node.data.label && Math.abs(ext - limit.position) <= 2) {
+                   mechanicallyTriggered = true;
+                }
+             });
           });
           // Allow manual click override from UI or mechanical trigger
           node.data.isTriggered = mechanicallyTriggered || node.data.isTriggered;
